@@ -34,4 +34,3 @@ To run with dependencies:
 
 ```sys.path.append('/home/rgm/soft/python/lib/')```
 
-Some of the local data dependencies are stored in the config file vhs.ini. 
