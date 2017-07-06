@@ -1,5 +1,6 @@
 SELECT
-/* 
+/*  WITHOUT FRAMESET STATISTICS 
+
    get DQC parameters for VHS framesets 
 
    TODO:
@@ -136,7 +137,10 @@ History
   mfks.casuvers as kscasuversion,
 
   /* Stats per fs */
-  nsources, 
+
+  /*
+
+  nsources,
   Ynsources, Jnsources, Hnsources, Ksnsources,
   JKsnsources, JHKsnsources, YJHKsnsources,
   onlyYnsources,   onlyJnsources,   onlyHnsources,   onlyKsnsources,  
@@ -164,6 +168,8 @@ History
     + CONVERT(float, ISNULL(onlyKsnsources, 0))) 
     / CONVERT(float, nullif(nsources, 0))
    AS AllOrphansFraction,
+
+*/
 
 /* Y data */
 /* Y Mulitiframe data*/
@@ -479,7 +485,6 @@ FROM
   LEFT OUTER JOIN MultiframeEsoKeys as mfesokeysKs
     ON ml.ksmfid  = mfesokeysks.multiframeID 
 
-
   /*   MultiframeDetectorEsoKeys */
   LEFT OUTER JOIN MultiFrameDetectorEsoKeys as MFDEKy
     ON  ml.ymfID = mfdeky.multiframeID 
@@ -497,11 +502,14 @@ FROM
     ON  ml.ksmfID = MFDEKks.multiframeID 
     AND ml.ksenum = MFDEKks.extnum 
 
-  /* Start of the Counts */
+  
+  /* Start of the Counts; This is probably slow */
+  /* 
+  / SUM(CASE syntax is courtesy of Mike Read on 20140430
   LEFT OUTER JOIN 
    (SELECT 
       framesetid, count(*) as nSources,
-
+ 
       SUM(CASE WHEN yAperMag3 > -1 THEN 1 ELSE 0 END) AS YnSources,
       SUM(CASE WHEN jAperMag3 > -1 THEN 1 ELSE 0 END) AS JnSources,
       SUM(CASE WHEN hAperMag3 > -1 THEN 1 ELSE 0 END) AS HnSources,
@@ -532,6 +540,8 @@ FROM
     
     GROUP BY framesetid
     ) AS STATS ON ml.framesetid = STATS.framesetid
+
+*/
 
 ORDER BY
 
