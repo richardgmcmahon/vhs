@@ -477,8 +477,8 @@ if __name__ == '__main__':
     ylimits = decrange
 
     # DES related files
-    desfile='/home/rgm/soft/des/round13-poly.txt'
-    descat='/data/des/Y2Q1/mag_psf_i_leq_18p5_thin.fits'
+    desfile = '/home/rgm/soft/des/round13-poly.txt'
+    descat = '/data/des/Y2Q1/mag_psf_i_leq_18p5_thin.fits'
 
     # VHS SADT files
     # maybe change to a directory

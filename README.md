@@ -34,3 +34,4 @@ To run with dependencies:
 
 ```sys.path.append('/home/rgm/soft/python/lib/')```
 
+See also Sophie Reed's repo: richardgmcmahon/VHSPhase3 forked from sr525/VHSPhase3
