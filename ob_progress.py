@@ -983,6 +983,16 @@ if __name__ == '__main__':
         "--date", default=date_default,
         dest='date', help="date as string e.g. '20151101'")
 
+
+
+    parser.add_argument(
+        "--rarange", default=[0.0, 24.0], type=float, nargs=2,
+        help="RA range in hours in form Deg Deg]")
+
+    parser.add_argument(
+        "--decrange", default=[-90.0, 30.0], type=float, nargs=2,
+        help="Declination range in degrees in form Deg Deg")
+
     runs_default = 'ALL'
     parser.set_defaults(runs=runs_default)
     parser.add_argument(
@@ -1001,21 +1011,18 @@ if __name__ == '__main__':
     parser.add_argument(
         "--obstatus",
         default=obstatus_default,
-        dest='obstatus',
         help="obstatus as string list e.g 'AC'" +
         " (default is ALL excluding status K = cancelled OBs)")
 
     qcstatus_default = 'ALL'
     parser.set_defaults(default=qcstatus_default)
     parser.add_argument("--qcstatus",
-                        dest='qcstatus',
                         help="qcstatus as string list e.g. 'D' ")
 
     viking_dqc_default = False
     parser.set_defaults(viking_dqc=viking_dqc_default)
     parser.add_argument("--viking_dqc",
                         action="store_true",
-                        dest='viking_dqc',
                         help="VIKING DQC file")
 
     viking_sources_default = False
@@ -1023,17 +1030,15 @@ if __name__ == '__main__':
     parser.add_argument(
        "--viking_sources",
        action="store_true",
-       dest='viking_sources',
        help="""VIKING source list file (assume VSA format with RA,
                Dec in radians)""")
 
     # radian or degree; need to support parsing check
     viking_radec_format_default = "degree"
-    parser.set_defaults(viking_sources=viking_sources_default)
+    parser.set_defaults(viking_radec_format=viking_radec_format_default)
     parser.add_argument(
        "--viking_radec_format",
        action="store_true",
-       dest='viking_radec_format',
        help="""VIKING dqc/source/tile list RA, Dec format (radian or degree)""")
 
     wrap_ra24hr_default = False
@@ -1117,14 +1122,25 @@ if __name__ == '__main__':
     print('args.date:', args.date)
     date = args.date
 
+    rarange = args.rarange
+    print('RA range:', rarange)
+
+    decrange = args.decrange
+    print('Dec range:', decrange)
+
+
     # no changes should be needed below
     VIKING = False
     viking_dqc = False
     if args.viking_dqc:
         VIKING = True
+        viking_dqc = True
 
     if args.viking_sources:
         VIKING = True
+        viking_sources = True
+
+    viking_radec_format = args.viking_radec_format
 
     zoom = True
 
@@ -1167,13 +1183,20 @@ if __name__ == '__main__':
         raw_input("Enter any key to continue: ")
 
     if VIKING:
-        viking_dqc = True
         if viking_dqc:
             viking = Table.read(dqcfile_viking)
             viking.meta['filename'] = dqcfile_viking
             print('Table column names: \n', viking.colnames)
             print('Table metadata: \n', viking.meta)
             viking.pprint
+
+        if viking_sources:
+            viking = Table.read(sourcefile_viking)
+            viking.meta['filename'] = dqcfile_viking
+            print('Table column names: \n', viking.colnames)
+            print('Table metadata: \n', viking.meta)
+            viking.pprint
+
 
     ra = table['RA (hrs)']
     dec = table['DEC (deg)']
@@ -1234,9 +1257,10 @@ if __name__ == '__main__':
 
     figfile = figpath + '/' + 'ob_progress_radec_des_' + datestamp + '.png'
     title = 'VHS-DES Progress: ' + infile
+
     plot_radec(ra[DES], dec[DES], title=title,
                plotfile=figfile,
-               rarange=[0.0, 24.0], decrange=[-90.0, 10.0])
+               rarange=rarange, decrange=decrange)
 
     print('Elapsed time(secs):', time.time() - t0)
 
@@ -1253,8 +1277,6 @@ if __name__ == '__main__':
         # rarange= [24.0, 0.0]
 
     # rarange= [12.0, -12.0]
-
-    decrange = [-90.0, 30.0]
 
     print()
     print('Plotting VHS tiles')
@@ -1367,7 +1389,7 @@ if __name__ == '__main__':
             suffix=date)
 
         overplot = True
-        print('Number of tile:', len(table))
+        print('Number of tiles:', len(table))
         plot_status_notcompleted(table,
                                  raUnits=raUnits,
                                  wrap_ra24hr=wrap_ra24hr)
@@ -1376,6 +1398,33 @@ if __name__ == '__main__':
         xdata = viking['ra']
         ydata = viking['dec']
         angle = Angle(xdata * u.deg)
+        angle.wrap_at('180d', inplace=True)
+        xdata = angle.degree / 15.0
+
+        # plt.plot(xdata, ydata, 'sr',
+        #    ms=5.0, markeredgecolor='r', alpha=0.2, label='VIKING')
+
+        print('Plotting VIKING tiles')
+        plt.suptitle(dqcfile_viking)
+        print('RA range:  ', np.min(viking['ra'] / 15.0),
+              np.max(viking['ra'] / 15.0))
+        print('Dec range:', np.min(viking['dec']), np.max(viking['dec']))
+        label = 'VIKING   (completed OBs)'
+        plot_vista_tiles(table=table,
+                         ra=viking['ra'] / 15.0, dec=viking['dec'],
+                         wrap_ra24hr=wrap_ra24hr, label=None,
+                         PA=0.0, aitoff=aitoff,
+                         alpha=0.1, color='red',
+                         figfile=figfile, title=None,
+                         raUnits=raUnits, overplot=True,
+                         rarange=rarange, decrange=decrange,
+                         suffix=date)
+
+    if viking_sources:
+        viking.info('stats')
+        xdata = viking['ra']
+        ydata = viking['dec']
+        angle = Angle(xdata * u.rad)
         angle.wrap_at('180d', inplace=True)
         xdata = angle.degree / 15.0
 
