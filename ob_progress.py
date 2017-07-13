@@ -1130,17 +1130,20 @@ if __name__ == '__main__':
 
 
     # no changes should be needed below
+
+    viking_radec_format = args.viking_radec_format
+
     VIKING = False
     viking_dqc = False
     if args.viking_dqc:
         VIKING = True
         viking_dqc = True
 
+    viking_sources = args.viking_sources
     if args.viking_sources:
         VIKING = True
-        viking_sources = True
 
-    viking_radec_format = args.viking_radec_format
+    print('viking_radec_format:', viking_radec_format)
 
     zoom = True
 
@@ -1272,11 +1275,6 @@ if __name__ == '__main__':
     if raUnits == 'hours':
         if wrap_ra24hr:
             rarange = [-12.0, 12.0]
-        if not wrap_ra24hr:
-            rarange = [0.0, 24.0]
-        # rarange= [24.0, 0.0]
-
-    # rarange= [12.0, -12.0]
 
     print()
     print('Plotting VHS tiles')
@@ -1421,32 +1419,24 @@ if __name__ == '__main__':
                          suffix=date)
 
     if viking_sources:
+        # VSA format
         viking.info('stats')
-        xdata = viking['ra']
-        ydata = viking['dec']
-        angle = Angle(xdata * u.rad)
-        angle.wrap_at('180d', inplace=True)
-        xdata = angle.degree / 15.0
+        xdata = viking['RA']
+        ydata = viking['DEC']
+        # angle = Angle(xdata * u.rad)
+        # angle.wrap_at('180d', inplace=True)
+        xdata = np.degrees(xdata) / 15.0
+        ydata = np.degrees(ydata)
 
         # plt.plot(xdata, ydata, 'sr',
         #    ms=5.0, markeredgecolor='r', alpha=0.2, label='VIKING')
 
-        print('Plotting VIKING tiles')
-        plt.suptitle(dqcfile_viking)
-        print('RA range:  ', np.min(viking['ra'] / 15.0),
-              np.max(viking['ra'] / 15.0))
-        print('Dec range:', np.min(viking['dec']), np.max(viking['dec']))
+        print('Plotting VIKING sources')
+        plt.suptitle(sourcefile_viking)
+        print('RA range:  ', np.min(xdata), np.max(xdata))
+        print('Dec range:', np.min(ydata), np.max(ydata))
         label = 'VIKING   (completed OBs)'
-        plot_vista_tiles(table=table,
-                         ra=viking['ra'] / 15.0, dec=viking['dec'],
-                         wrap_ra24hr=wrap_ra24hr, label=None,
-                         PA=0.0, aitoff=aitoff,
-                         alpha=0.1, color='red',
-                         figfile=figfile, title=None,
-                         raUnits=raUnits, overplot=True,
-                         rarange=rarange, decrange=decrange,
-                         suffix=date)
-
+        plt.plot(xdata, ydata, 'r.')
         plt.grid()
 
         figfile = figpath + '/' + 'ob_progress_des_viking_' + datestamp + '.png'
@@ -1460,12 +1450,12 @@ if __name__ == '__main__':
     figfile = figpath + '/' + 'ob_progress_radec_atlas_' + datestamp + '.png'
     plot_radec(ra[ATLAS], dec[ATLAS], title='VHS-GPS Progress: ' + infile,
                plotfile=figfile,
-               rarange=[0.0, 24.0], decrange=[-90.0, 10.0])
+               rarange=rarange, decrange=decrange)
 
     figfile = figpath + '/' + 'ob_progress_radec_gps_' + datestamp + '.png'
     plot_radec(ra[GPS], dec[GPS], title='VHS-GPS Progress: ' + infile,
                plotfile=figfile,
-               rarange=[0.0, 24.0], decrange=[-90.0, 10.0])
+               rarange=rarange, decrange=decrange)
 
     figfile = outpath + '/' + 'ob_progress_ra_executiontime_' + \
         datestamp + '.png'
