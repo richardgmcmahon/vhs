@@ -16,7 +16,6 @@ path is more generic than dir or folder
 
 https://matplotlib.org/faq/usage_faq.html#parts-of-a-figure
 
-
 Input formats to be supported:
 
 1: ESO Portal csv or FITS format files
@@ -92,7 +91,6 @@ from librgm.plot_radec import plot_radec
 import plot_radec_tile as plt_tile
 
 import des_footprint
-
 
 import ConfigParser
 Config = ConfigParser.RawConfigParser()
@@ -982,7 +980,6 @@ if __name__ == '__main__':
     parser.add_argument(
         "--date", default=date_default,
         dest='date', help="date as string e.g. '20151101'")
-
 
 
     parser.add_argument(

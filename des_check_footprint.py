@@ -179,6 +179,7 @@ def plot_sadt_tile(sadtfile=None, sadtfiles=None, sadtfile_path=None,
   plt.title(desfile)
   plt.suptitle(sadtfile)
   plotid(progname=True)
+  plt.grid()
   plt.legend(markerscale=2.0, fontsize='medium')
 
   # filled polygon
@@ -486,6 +487,8 @@ if __name__ == '__main__':
     # 20160803
     sadtfile_path = '/data/mbanerji/Projects/VHS_Survey/SADT_outputs/Boundary_tests/'
 
+    sadtfile_path = '/data/mbanerji/Projects/VHS_Survey/SADT_outputs/Boundary_tests/Dec2017/'
+
     sadtfiles = ['Str45_DES_RA_XXX_XXX.xml',
                  'Str46_DES_RA_XXX_XXX.xml',
                  'Str47_DES_RA_XXX_XXX.xml',
@@ -505,7 +508,7 @@ if __name__ == '__main__':
     # filelist=os.listdir(sadtfile_path)
 
     # _GPS
-    sadtfiles = sorted(glob.glob(sadtfile_path + '*_GPS*.xml'))
+    # sadtfiles = sorted(glob.glob(sadtfile_path + '*_GPS*.xml'))
 
     if args.path is not None: sadtfile_path = args.path
     print('sadtfile_path: ', sadtfile_path)
