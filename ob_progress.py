@@ -130,7 +130,7 @@ def set_obstatus_codes():
 
 
 def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
-                     raUnits='degrees', wrap_ra24hr=False, aitoff=False,
+                     raUnits='degree', wrap_ra24hr=False, aitoff=False,
                      filename=None,
                      title=None, xlabel=None, ylabel=None, label=None,
                      verbose=False, debug=False,
@@ -163,13 +163,13 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
 
     # configure for aitoff
     if aitoff:
-        raUnits = 'radians'
+        raUnits = 'radian'
         wrap_ra24hr = False
 
     # matplotlib aitoff only support full sky
     if rarange is None and not aitoff:
         plt.xlim([0, 24.0])
-        if raUnits == 'degrees':
+        if raUnits == 'degree':
             plt.xlim([0, 360.0])
     if rarange is not None and not aitoff:
         plt.xlim(rarange)
@@ -193,13 +193,13 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
         if aitoff:
             plt.subplot(111, projection="aitoff")
 
-    if raUnits == 'degrees':
-        plt.xlabel('RA (degrees)')
-    if raUnits == 'hours':
-        plt.xlabel('RA (hours)')
+    if raUnits == 'degree':
+        plt.xlabel('RA (degree)')
+    if raUnits == 'hour':
+        plt.xlabel('RA (hour)')
     if xlabel is not None:
         plt.xlabel(xlabel)
-    plt.ylabel('Declination (degrees)')
+    plt.ylabel('Declination (degree)')
     if ylabel is not None:
         plt.ylabel(ylabel)
     # if title != None: plt.title(title)
@@ -212,7 +212,7 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
     print('Dec range:', np.min(ydata), np.max(ydata))
 
     # convert to degrees for polygon and wrap calc
-    if raUnits == 'hours':
+    if raUnits == 'hour':
         xdata = xdata * 15.0
 
     print('RA range: ', np.min(xdata), np.max(xdata))
@@ -235,7 +235,7 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
         print('plotting: ', filename)
 
     if not plot_polygon:
-        if raUnits == 'hours':
+        if raUnits == 'hour':
             xdata = xdata / 15.0
         plt.plot(xdata, ydata, 's', ms=7.0,
                  color='yellow', markeredgecolor='yellow',
@@ -258,13 +258,13 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
     # do not plot the polygon when color = 'none' as used for adding info
     # to the legend
     if plot_polygon and color != 'none':
-        if raUnits == 'hours':
+        if raUnits == 'hour':
             xdata = xdata / 15.0
 
         # filled polygon
         ra = xdata
         dec = ydata
-        if raUnits == 'hours':
+        if raUnits == 'hour':
             ra = ra * 15.0
         print('Elapsed time(secs): ', time.time() - t0)
         for i in range(len(ra)):
@@ -274,7 +274,7 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
                 ra_cen=ra[i], dec_cen=dec[i],
                 coverage='twice', PA=PA)
 
-            if raUnits == 'hours':
+            if raUnits == 'hour':
                 ivertex = -1
                 if debug:
                     print('ra_poly: ', ra_poly)
@@ -553,7 +553,7 @@ def aitoff_test(ra, dec):
     print('Plotting the shaded tiles')
 
 
-def plot_status_notcompleted(table, raUnits='hours', wrap_ra24hr=False):
+def plot_status_notcompleted(table, raUnits='hour', wrap_ra24hr=False):
     """
 
 
@@ -662,7 +662,7 @@ def save_radec(table):
 
 
 def plot_despolygon(table=None,
-                    raUnits='hours', wrap_ra24hr=False,
+                    raUnits='hour', wrap_ra24hr=False,
                     label='DES Round13-poly'):
     """
 
@@ -676,9 +676,9 @@ def plot_despolygon(table=None,
     datestamp = time.strftime("%Y%m%d", gmtime())
 
     # convert RA in degrees to hours
-    if raUnits == 'hours':
+    if raUnits == 'hour':
         xdata = table['ra'] / 15.0
-    if raUnits == 'degrees':
+    if raUnits == 'degree':
         xdata = table['ra']
     ydata = table['dec']
 
@@ -687,10 +687,10 @@ def plot_despolygon(table=None,
 
     plt.plot(xdata, ydata, color='blue', label=label)
 
-    if raUnits == 'hours':
+    if raUnits == 'hour':
         plt.plot(xdata + 24.0, ydata, color='blue', label=label)
 
-    if wrap_ra24hr and raUnits == 'degrees':
+    if wrap_ra24hr and raUnits == 'degree':
         plt.plot(xdata - 180.0, ydata, color='blue', label=label)
 
     figname = appname + '_' + datestamp + '.png'
@@ -699,7 +699,7 @@ def plot_despolygon(table=None,
 
 
 def plot_skycoords(system='Galactic', axis='latitude',
-                   units='degrees', wrap_ra24hr=False,
+                   units='degree', wrap_ra24hr=False,
                    overplot=False, label=True):
     """
     could be generalised for ecliptic and lat/long
@@ -773,9 +773,9 @@ def plot_skycoords(system='Galactic', axis='latitude',
         print('0,0: ', ra[0], dec[0])
 
         # determine if where there are 24hrs wraps
-        if units == 'degrees':
+        if units == 'degree':
             wrap_range = 240.0
-        if units == 'hours':
+        if units == 'hour':
             wrap_range = 18.0
             ra = ra / 15.0
 
@@ -931,13 +931,13 @@ def plot_skycoords_plot(xdata, ydata,
                  linestyle=linestyle,
                  color=color)
 
-    if units == 'degrees':
+    if units == 'degree':
         if wrap_ra24hr:
             plt.xlim([-180.0, 180.0])
         else:
             plt.xlim([0.0, 360.0])
 
-    if not aitoff and units == 'hours':
+    if not aitoff and units == 'hour':
         if wrap_ra24hr:
             plt.xlim([-12.0, 12.0])
         else:
@@ -981,14 +981,17 @@ if __name__ == '__main__':
         "--date", default=date_default,
         dest='date', help="date as string e.g. '20151101'")
 
-
     parser.add_argument(
         "--rarange", default=[0.0, 24.0], type=float, nargs=2,
-        help="RA range in hours in form Deg Deg]")
+        help="RA range in hours in form Deg Deg")
 
     parser.add_argument(
         "--decrange", default=[-90.0, 30.0], type=float, nargs=2,
         help="Declination range in degrees in form Deg Deg")
+
+    parser.add_argument(
+        "--raunits", default="hour",
+        help="RA units hour or degree; default = 'hour'")
 
     runs_default = 'ALL'
     parser.set_defaults(runs=runs_default)
@@ -1113,7 +1116,7 @@ if __name__ == '__main__':
     wrap_ra24hr = args.wrap_ra24hr
     print('wrap_ra24hr: ', wrap_ra24hr)
 
-    raUnits = 'hours'
+    raUnits = args.raunits
     print('raUnits:', raUnits)
 
     print('args.date:', args.date)
@@ -1269,7 +1272,7 @@ if __name__ == '__main__':
 
     # option to centre on 0 hrs with 24hr wrap
 
-    if raUnits == 'hours':
+    if raUnits == 'hour':
         if wrap_ra24hr:
             rarange = [-12.0, 12.0]
 
@@ -1285,9 +1288,9 @@ if __name__ == '__main__':
     # if pause: raw_input("Enter any key to continue: ")
 
     plot_skycoords(overplot=False,
-                   wrap_ra24hr=True, units='hours', label=None)
+                   wrap_ra24hr=True, units='hour', label=None)
     plot_skycoords(overplot=True, system='Ecliptic', wrap_ra24hr=True,
-                   units='hours', label=None)
+                   units='hour', label=None)
     if pause:
         raw_input("Enter any key to continue: ")
 
@@ -1305,7 +1308,6 @@ if __name__ == '__main__':
                      suffix=date)
     overplot = True
 
-    raUnits = 'hours'
     plot_skycoords(overplot=overplot, wrap_ra24hr=wrap_ra24hr,
                    units=raUnits,
                    label=None)
