@@ -102,7 +102,8 @@ def rd_obprogress(url=False, date=None):
 
 
 def plot_sadt_tile(sadtfile=None, sadtfiles=None, sadtfile_path=None,
-                   xlimits=None, ylimits=None, color='orange'):
+                   xlimits=None, ylimits=None, raUnits=None,
+                   color='orange'):
   """
 
   """
@@ -439,6 +440,12 @@ if __name__ == '__main__':
         "--decrange", default=[-90.0, 90.0], type=float, nargs=2,
         help="Declination range in degrees in form Deg Deg")
 
+
+    parser.add_argument(
+        "--raunits", default="hour",
+        help="RA units hour or degree; default = 'hour'")
+
+
     parser.set_defaults(path=None)
     parser.add_argument(
         "--path",
@@ -454,6 +461,9 @@ if __name__ == '__main__':
 
     decrange = args.decrange
     print('Dec range:', decrange)
+
+    raUnits = args.raunits
+    print('raUnits:', raUnits)
 
     t0 = time.time()
 
