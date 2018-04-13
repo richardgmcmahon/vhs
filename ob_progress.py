@@ -759,13 +759,17 @@ if __name__ == '__main__':
 
     import ConfigParser
 
-    from argparse import ArgumentParser
+    import argparse
+    # from argparse import ArgumentParser
 
-    t0 = time.time()
+    global t0
 
-    parser = ArgumentParser(
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='OB progress analysis (see also IDL version ob_progress)'
     )
+
+    t0 = time.time()
 
     date_default = time.strftime("%Y%m%d", gmtime())
     parser.set_defaults(date=date_default)
