@@ -1,13 +1,22 @@
-from astropy.table import Table
-from astropy.time import Time
+from __future__ import print_function, division
+
+import sys
+import time
 import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
-import match_lists
-import plotid
+
+from astropy.table import Table
+from astropy.time import Time
+
+sys.path.append('/home/rgm/soft/python/lib/')
+from librgm.xmatch import match_lists
+from librgm.plotid import plotid
 
 def mk_corner_file(file, band, exptime = False):
+    """
 
+    """
     t = Table.read(file)
     lines = "#Corner file for VHS from " + file + "\n#RA_min    RA_max    Dec_min    Dec_max    Framesetid\n"
     n = 0
@@ -29,7 +38,7 @@ def mk_corner_file(file, band, exptime = False):
         if not exptime:
             ids = np.where( (t["filtname"] == band) )[0]
         else:
-            print exptime
+            print(exptime)
             ids = np.where( (t["filtname"] == band) & (t["image_exptime"] == exptime) )[0]
         if band == "all":
             ids = np.ones(len(t), dtype = np.bool)
@@ -48,12 +57,12 @@ def mk_corner_file(file, band, exptime = False):
     try:
         with open(file[:-5] + "_corners_" + band + ".txt", "w") as f:
             f.write(lines)
-        print "Made corner file:", file[:-5] + "_corners_" + band + ".txt"
+        print("Made corner file:", file[:-5] + "_corners_" + band + ".txt")
         return file[:-5] + "_corners_" + band + ".txt"
     except IOError:
         with open(file[:9] + file[18:-5] + "_corners_" + band + ".txt", "w") as f:
             f.write(lines)
-        print "Made corner file:", file[:9] + file[18:-5] + "_corners_" + band + ".txt"
+        print("Made corner file:", file[:9] + file[18:-5] + "_corners_" + band + ".txt")
         return file[:9] + file[18:-5] + "_corners_" + band + ".txt"
 
 def mk_corner_file_all(file):
@@ -61,9 +70,14 @@ def mk_corner_file_all(file):
     lines = ""
 
     c = 0
-    print file
+    print(file)
     for band in ["Y", "J", "H", "KS"]:
-        f = open(file[:-5] + "_corners_" + band + ".txt", "r")
+        print(file)
+        print(file[:-5])
+        # 20180504_rgm: added cfile
+        cfile = file[:-5] + "_corners_" + band + ".txt"
+        print('open:', cfile)
+        f = open(cfile, "r")
 
         if c == 0:
             for line in f:
@@ -97,7 +111,7 @@ def mk_weight_file(file, band, conv):
         if not exptime:
             ids = np.where( (t["filtname"] == band) )[0]
         else:
-            print exptime
+            print(exptime)
             ids = np.where( (t["filtname"] == band) & (t["image_exptime"] == exptime) )[0]
         if band == "all":
             ids = np.ones(len(t), dtype = np.bool)
@@ -111,7 +125,7 @@ def mk_weight_file(file, band, conv):
     with open(file[:-5] + "_weights_" + band + ".txt", "w") as f:
         f.write(lines)
 
-    print "Made weight file:", file[:-5] + "_weights_" + band + ".txt"
+    print("Made weight file:", file[:-5] + "_weights_" + band + ".txt")
     return file[:-5] + "_weights_" + band + ".txt"
 
 def mk_weight_file_all(file):
@@ -119,7 +133,7 @@ def mk_weight_file_all(file):
     lines = ""
 
     c = 0
-    print file
+    print(file)
     for band in ["Y", "J", "H", "KS"]:
         f = open(file[:-5] + "_weights_" + band + ".txt", "r")
 
@@ -138,12 +152,17 @@ def mk_weight_file_all(file):
     return file[:-5] + "_weights_all.txt"
 
 def run_mangle(file, band, conv, exptime = False):
+    """
 
+    """
     if band == "all":
         corner_file = mk_corner_file_all(file)
     else:
         corner_file = mk_corner_file(file, band, exptime = exptime)
+
     corners_out = corner_file[:-4] + "_mangle_output_" + band
+    print(corner_file)
+    print(corners_out)
     subprocess.call(["poly2poly", "-ir", corner_file, corners_out])
 
     if band == "all":
@@ -176,7 +195,7 @@ def run_mangle(file, band, conv, exptime = False):
 def area_depth(file, area_file, depth_file, band, conv):
 
     areas = []
-    print area_file
+    print(area_file)
     with open(area_file, "r") as af:
         for line in af:
             area = line.split()[0]
@@ -193,7 +212,7 @@ def area_depth(file, area_file, depth_file, band, conv):
     areas = np.array(areas)*((180.0/np.pi)**2)
     depths = np.array(depths) + conv
 
-    print "Total area:", np.sum(areas)
+    print("Total area:", np.sum(areas))
 
     bins = np.linspace(min(depths), max(depths), 101)
     areas_out = np.zeros(100)
@@ -216,7 +235,7 @@ def area_depth(file, area_file, depth_file, band, conv):
         if half_area > cum_areas[n] and half_area < cum_areas[n+1]:
             half_lim = bins[::-1][1:][n]
         n += 1
-    print "Magnitude limit for half the area:", half_lim
+    print("Magnitude limit for half the area:", half_lim)
 
     half_lim = "%0.2f" % half_lim
     tot_area = "%0.2f" % tot_area
@@ -225,7 +244,7 @@ def area_depth(file, area_file, depth_file, band, conv):
     ax = fig.add_subplot(111)
     ax.plot(bins[::-1][1:], cum_areas)
     ax.set_title("Area in the " + band + " band\n from " + file)
-    print conv
+    print(conv)
     if conv <= 0.0:
         ax.set_xlabel("Magnitude Limit " + band + " band [Vega]")
     elif conv > 0.0:
@@ -295,7 +314,7 @@ def area_depth_all(file, system = "AB", norm = False, save_data = False):
         areas = np.array(areas)*((180.0/np.pi)**2)
         depths = np.array(depths) + conv
 
-        print "Total area:", np.sum(areas)
+        print("Total area:", np.sum(areas))
 
         bins = np.linspace(min(depths), max(depths), 101)
         areas_out = np.zeros(100)
@@ -318,7 +337,7 @@ def area_depth_all(file, system = "AB", norm = False, save_data = False):
             if half_area > cum_areas[n] and half_area < cum_areas[n+1]:
                 half_lim = bins[::-1][1:][n]
             n += 1
-        print "Magnitude limit for half the area:", half_lim
+        print("Magnitude limit for half the area:", half_lim)
 
         half_lim = "%0.2f" % half_lim
         tot_area = "%0.2f" % tot_area
@@ -355,7 +374,7 @@ def area_depth_all(file, system = "AB", norm = False, save_data = False):
             title_file += (letter)
         else:
             title_file += ("\\" + letter)
-    print file, title_file
+    print(file, title_file)
     plt.suptitle(title_file)
     plotid.plotid()
     if system == "Vega":
@@ -418,7 +437,7 @@ def tile_depth(file, system = "AB"):
 
         else:
             ids = np.where( (t["filtname"] == band) )[0]
-            print len(ids)
+            print(len(ids))
             mag_lim_list.append(t["maglim"][ids])
 
     for (mags, band) in zip(mag_lim_list, bands):
@@ -498,7 +517,7 @@ def depth_check(file):
         plt.title(file + " " + band)
         plt.show()
 
-        print np.median(mag_check-tb["maglim"])
+        print(np.median(mag_check-tb["maglim"]))
 
         plt.plot(tb["seeing"], mag_check-tb["maglim"], "k.")
         plt.xlabel("seeing")
@@ -507,42 +526,131 @@ def depth_check(file):
         plt.show()
 
 
+def getargs(verbose=False):
+    """
 
-file = "/data/vhs/vsa/dqc/VHSv20140517/vhs_vsa_dqc_tiles_fs_metadata.fits"
-file = r"/data/sr525/VHS/2016/vhs_vsa_dqc_tiles_fs_metadata.fits"
+    parse command line arguements
 
-#tile_depth(file, system = "AB")
-#tile_depth(file, system = "Vega")
-#area_depth_all(file, system = "AB", norm = False)
-#area_depth_all(file, system = "AB", norm = True, save_data = True)
-#area_depth_all(file, system = "Vega", norm = False)
-#area_depth_all(file, system = "Vega", norm = True)
-area_file, depth_file = run_mangle(file, "all", 0.0)
-area_depth(file, area_file, depth_file, "all", 0.0)
+    not all args are active
 
-"""
-file = "/data/vhs/dqc/2014/vistaqc_20140131_tiles_vhs.fits"
-tile_depth(file, system = "AB")
-tile_depth(file, system = "Vega")
-area_depth_all(file, system = "AB", norm = False)
-area_depth_all(file, system = "AB", norm = True)
-area_depth_all(file, system = "Vega", norm = False)
-area_depth_all(file, system = "Vega", norm = True)
 
-#file = "/data/vhs/dqc/2014/vistaqc_20140131_tiles_vhs.fits"
-#area_depth_all(file)
-#tile_depth(file)
-#depth_compare()
-#depth_check(file)
-exptime = False
-#Need a factor of 2.5log10(3/5) = 0.55 to change 3 sigma limits to 5 sigma.
-#Takes it as Vega if conversion is < 0.6
+    """
+    import sys
+    import pprint
+    import argparse
 
-convs = [0.618-0.55, 0.937-0.55, 1.839-0.55, 1.384-0.55]
-#convs = [-0.55, -0.55, -0.55, -0.55]
-for (band, conv) in zip(["Y", "J", "H", "KS"], convs):
-    area_file = file[:-5] + "_area_mangle_out_" + band
-    depth_file = file[:-5] + "_depth_mangle_out_" + band
-    area_file, depth_file = run_mangle(file, band, conv, exptime = exptime)
-    area_depth(file, area_file, depth_file, band, conv)
-"""
+    # there is probably a version function out there
+    __version__ = '0.1'
+
+    description = 'This is a template using getargs'
+    epilog = """WARNING: Not all options may be supported
+             """
+    parser =  argparse.ArgumentParser(
+        description=description, epilog=epilog,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+
+    # the destination defaults to the option parameter
+    # defaul=False might not be needed
+
+    parser.add_argument("--infile",
+                        help="Input file name")
+
+    parser.add_argument("--magsys",
+                        default='AB',
+                        help="Magnitude system [AB or Vega]")
+
+
+    parser.add_argument("--configfile",
+                        default=None,
+                        help="configuration file")
+
+    parser.add_argument("--debug",
+                        action='store_true',
+                        help="debug option")
+
+    parser.add_argument("--verbose", default=verbose,
+                        action='store_true',
+                        help="verbose option")
+
+    parser.add_argument("--version", action='store_true',
+                        help="verbose option")
+
+
+    args = parser.parse_args()
+
+
+    if args.debug or args.verbose:
+        print('Number of arguments:', len(sys.argv),
+              'arguments: ', sys.argv[0])
+
+    if args.debug or args.verbose:
+        pprint.pprint(args)
+
+    if args.version:
+        print('version:', __version__)
+        sys.exit(0)
+
+
+    return args
+
+
+
+if __name__ == '__main__':
+
+    from librgm.getconfig import getconfig
+
+    args = getargs()
+    debug = args.debug
+
+    configfile = 'vhs_mk_mangle_mask.cfg'
+    if args.configfile is not None:
+        configfile = args.configfile
+    config = getconfig(configfile=configfile, debug=debug)
+
+    infile = config.get('CONFIG', 'infile')
+    print('infile:', infile)
+
+    # file = "/data/vhs/vsa/dqc/VHSv20140517/vhs_vsa_dqc_tiles_fs_metadata.fits"
+
+    # file = "/data/sr525/VHS/2016/vhs_vsa_dqc_tiles_fs_metadata.fits"
+    #/data/sr525/VHS/2016 has various files vhs_vsa_dqc_tiles_fs_metadata...
+
+
+    #tile_depth(file, system = "AB")
+    #tile_depth(file, system = "Vega")
+    #area_depth_all(file, system = "AB", norm = False)
+    #area_depth_all(file, system = "AB", norm = True, save_data = True)
+    #area_depth_all(file, system = "Vega", norm = False)
+    #area_depth_all(file, system = "Vega", norm = True)
+
+    area_file, depth_file = run_mangle(infile, "all", 0.0)
+
+    area_depth(infile, area_file, depth_file, "all", 0.0)
+
+    """
+    file = "/data/vhs/dqc/2014/vistaqc_20140131_tiles_vhs.fits"
+    tile_depth(file, system = "AB")
+    tile_depth(file, system = "Vega")
+    area_depth_all(file, system = "AB", norm = False)
+    area_depth_all(file, system = "AB", norm = True)
+    area_depth_all(file, system = "Vega", norm = False)
+    area_depth_all(file, system = "Vega", norm = True)
+
+    #file = "/data/vhs/dqc/2014/vistaqc_20140131_tiles_vhs.fits"
+    #area_depth_all(file)
+    #tile_depth(file)
+    #depth_compare()
+    #depth_check(file)
+    exptime = False
+    #Need a factor of 2.5log10(3/5) = 0.55 to change 3 sigma limits to 5 sigma.
+    #Takes it as Vega if conversion is < 0.6
+
+    convs = [0.618-0.55, 0.937-0.55, 1.839-0.55, 1.384-0.55]
+    #convs = [-0.55, -0.55, -0.55, -0.55]
+    for (band, conv) in zip(["Y", "J", "H", "KS"], convs):
+        area_file = file[:-5] + "_area_mangle_out_" + band
+        depth_file = file[:-5] + "_depth_mangle_out_" + band
+        area_file, depth_file = run_mangle(file, band, conv, exptime = exptime)
+        area_depth(file, area_file, depth_file, band, conv)
+    """
