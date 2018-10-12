@@ -154,7 +154,10 @@ def mk_weight_file_all(file):
 def run_mangle(file, band, conv, exptime = False):
     """
 
+
     """
+
+    print('Running mangle on:', file)
     if band == "all":
         corner_file = mk_corner_file_all(file)
     else:
@@ -163,32 +166,40 @@ def run_mangle(file, band, conv, exptime = False):
     corners_out = corner_file[:-4] + "_mangle_output_" + band
     print(corner_file)
     print(corners_out)
-    subprocess.call(["poly2poly", "-ir", corner_file, corners_out])
+    subprocess.call([manglepath + "poly2poly",
+                     "-ir", corner_file, corners_out])
 
     if band == "all":
         weight_file = mk_weight_file_all(file)
     else:
         weight_file = mk_weight_file(file, band, conv)
     weights_out = weight_file[:-4] + "_mangle_output_" + band
-    subprocess.call(["weight", "-z", weight_file, corners_out, weights_out])
+    subprocess.call([manglepath + "weight",
+                     "-z", weight_file, corners_out, weights_out])
 
     pix_out = file[:-5] + "_pix_mangle_out_" + band
-    subprocess.call(["pixelize", weights_out, pix_out])
+    subprocess.call([manglepath + "pixelize",
+                     weights_out, pix_out])
 
     snap_out = file[:-5] + "_snap_mangle_out_" + band
-    subprocess.call(["snap", pix_out, snap_out])
+    subprocess.call([manglepath + "snap",
+                     pix_out, snap_out])
 
     balk_out = file[:-5] + "_balk_mangle_out_" + band
-    subprocess.call(["balkanize", snap_out, balk_out, "-Bx"])
+    subprocess.call([manglepath + "balkanize",
+                     snap_out, balk_out, "-Bx"])
 
     unify_out = file[:-5] + "_unify_mangle_out_" + band
-    subprocess.call(["unify", balk_out, unify_out])
+    subprocess.call([manglepath + "unify",
+                     balk_out, unify_out])
 
     area_file = file[:-5] + "_area_mangle_out_" + band
-    subprocess.call(["poly2poly", "-oa", unify_out, area_file])
+    subprocess.call([manglepath + "poly2poly",
+                     "-oa", unify_out, area_file])
 
     depth_file = file[:-5] + "_depth_mangle_out_" + band
-    subprocess.call(["poly2poly", "-ow", unify_out, depth_file])
+    subprocess.call([manglepath + "poly2poly",
+                     "-ow", unify_out, depth_file])
 
     return area_file, depth_file
 
@@ -376,7 +387,7 @@ def area_depth_all(file, system = "AB", norm = False, save_data = False):
             title_file += ("\\" + letter)
     print(file, title_file)
     plt.suptitle(title_file)
-    plotid.plotid()
+    plotid()
     if system == "Vega":
         ax.set_xlabel("Magnitude Limit [Vega]")
         ax.set_xlim(17, 22)
@@ -391,8 +402,11 @@ def area_depth_all(file, system = "AB", norm = False, save_data = False):
     plt.show()
 
 
-def tile_depth(file, system = "AB"):
+def tile_depth(file, system="AB",
+               showplot=False,
+               saveplot=True, plotdir=None):
 
+    print('Reading:', file)
     t = Table.read(file)
 
     bands = ["Y", "J", "H", "Ks"]
@@ -476,10 +490,23 @@ def tile_depth(file, system = "AB"):
     ax.text(0.01, 0.02, info, transform = ax.transAxes, bbox = dict(facecolor = "white", alpha = 0.7), family = "monospace")
     ax.text(0.01, 0.90, mjd_info, transform = ax.transAxes, bbox = dict(facecolor = "white", alpha = 0.7), family = "monospace")
     plt.ylabel("Fraction with deeper than mag limit")
-    plotid.plotid()
-    plt.title(file)
+    plotid()
+    plt.title(file, fontsize='medium')
     plt.legend(loc = "best")
-    plt.show()
+
+    plotfile = 'tile_depth_hist_Vega.png'
+    if system == 'AB':
+        plotfile = 'tile_depth_hist_AB.png'
+
+    if saveplot:
+        print('Saving:', plotfile)
+        plt.savefig(plotfile)
+
+    if showplot:
+        plt.show()
+
+    return
+
 
 def depth_compare():
 
@@ -608,28 +635,55 @@ if __name__ == '__main__':
         configfile = args.configfile
     config = getconfig(configfile=configfile, debug=debug)
 
-    infile = config.get('CONFIG', 'infile')
+    inpath = config.get('CONFIG', 'inpath')
+    infilename = config.get('CONFIG', 'infilename')
+    infile = inpath + infilename
     print('infile:', infile)
+
+    manglepath = config.get('CONFIG', 'manglepath')
+
+    outpath = config.get('CONFIG', 'outpath')
 
     # file = "/data/vhs/vsa/dqc/VHSv20140517/vhs_vsa_dqc_tiles_fs_metadata.fits"
 
     # file = "/data/sr525/VHS/2016/vhs_vsa_dqc_tiles_fs_metadata.fits"
     #/data/sr525/VHS/2016 has various files vhs_vsa_dqc_tiles_fs_metadata...
+    # infile = "/data/vhs/dqc/2014/vistaqc_20140131_tiles_vhs.fits"
 
+    # plot cdf for tile depths
+    tile_depth(infile, system = "AB", saveplot=True, plotdir='./')
+    tile_depth(infile, system = "Vega", saveplot=True, plotdir='./')
 
-    #tile_depth(file, system = "AB")
-    #tile_depth(file, system = "Vega")
-    #area_depth_all(file, system = "AB", norm = False)
-    #area_depth_all(file, system = "AB", norm = True, save_data = True)
+    # this works
+    area_file, depth_file = run_mangle(infile, "all", 0.0)
+
+    print()
+    print('area_file:', len(area_file))
+    print('area_file:', area_file)
+    print()
+    print('depth_file:', len(depth_file))
+    print('depth_file:', depth_file)
+    print()
+
+    print('run area_depth_all')
+    print('infile:', infile)
+
+    #area_depth_all(infile, system = "AB", norm = False)
+
+    #sys.exit()
+
+    #area_depth_all(infile, system = "AB", norm = True, save_data = True)
+
     #area_depth_all(file, system = "Vega", norm = False)
     #area_depth_all(file, system = "Vega", norm = True)
 
-    area_file, depth_file = run_mangle(infile, "all", 0.0)
+    #area_file, depth_file = run_mangle(infile, "all", 0.0)
 
     area_depth(infile, area_file, depth_file, "all", 0.0)
 
+
     """
-    file = "/data/vhs/dqc/2014/vistaqc_20140131_tiles_vhs.fits"
+
     tile_depth(file, system = "AB")
     tile_depth(file, system = "Vega")
     area_depth_all(file, system = "AB", norm = False)
