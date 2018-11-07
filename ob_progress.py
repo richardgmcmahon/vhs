@@ -1057,8 +1057,10 @@ if __name__ == '__main__':
     figfile = figpath + '/' + 'ob_progress_radec_des_' + datestamp + '.png'
     title = 'VHS-DES Progress: ' + infile
 
-    plot_radec(ra[DES], dec[DES], title=title,
+    print('Number of DES rows:', len(ra[DES]), len(dec[DES]))
+    plot_radec(ra=ra[DES], dec=dec[DES], title=title,
                plotfile=figfile,
+               plotfile_prefix='ob_progress',
                rarange=rarange, decrange=decrange)
 
     print('Elapsed time(secs):', time.time() - t0)
@@ -1243,12 +1245,14 @@ if __name__ == '__main__':
         raw_input("Enter any key to continue: ")
 
     figfile = figpath + '/' + 'ob_progress_radec_atlas_' + datestamp + '.png'
-    plot_radec(ra[ATLAS], dec[ATLAS], title='VHS-GPS Progress: ' + infile,
+    plot_radec(ra=ra[ATLAS], dec=dec[ATLAS],
+               title='VHS-GPS Progress: ' + infile,
                plotfile=figfile,
                rarange=rarange, decrange=decrange)
 
     figfile = figpath + '/' + 'ob_progress_radec_gps_' + datestamp + '.png'
-    plot_radec(ra[GPS], dec[GPS], title='VHS-GPS Progress: ' + infile,
+    plot_radec(ra=ra[GPS], dec=dec[GPS],
+               title='VHS-GPS Progress: ' + infile,
                plotfile=figfile,
                rarange=rarange, decrange=decrange)
 
