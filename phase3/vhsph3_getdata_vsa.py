@@ -185,6 +185,11 @@ if not args.test:
     dqcpath = '/data/vhs/dqc/vsa/2016/VHSv20160507/'
     dqcfilename = 'vhs_vsa_dqc_tiles_fs_metadata.fits'
 
+    # VHS_DR5
+    dqcpath = '/data/vhs/dqc/vsa/2018/VHSv20171207_ESOdr5/'
+    dqcfilename = 'vhs_vsa_dqc_tiles_20171207_ESOdr5.fits'
+
+
     args.dqcfile = dqcpath + dqcfilename
     print('dqcfile:', args.dqcfile)
 
@@ -194,7 +199,7 @@ if not args.test:
     dqc.info('stats')
 
     fsids = dqc['FRAMESETID']
-    nsources = dqc['NSOURCES']
+    # nsources = dqc['NSOURCES']
 
     print('outpath:', outpath)
     if not os.path.isdir(outpath):
@@ -357,7 +362,7 @@ i = 0
 for fsid in fsids:
     i = i + 1
     print('fsid:', fsid, i, 'out of:', len(fsids))
-    print('Number of sources in frameset:', nsources[i - 1])
+    #print('Number of sources in frameset:', nsources[i - 1])
 
     result = doquery(fsid, debug=debug)
 

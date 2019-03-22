@@ -1,6 +1,10 @@
 
 """
 
+CHANGELOG
+201801102: @rgm plot_skycoords_plot moved to plot_skycoords in librgm
+
+
 Read and Plot VISTA survey progress files based on IDL program ob_progress.pro
 
 ISSUES: show we use figfile or plotfile consistently?
@@ -138,6 +142,7 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
                      color=None, alpha=None,
                      overplot=False,
                      savefig=True, plotdir=None, figfile=None,
+                     showplot=False, pause=False,
                      suffix=None,
                      rarange=[0.0, 24.0], decrange=[-90.0, 10.0],
                      figsize=(12.0, 6.0)):
@@ -323,6 +328,7 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
                prop={'family': 'monospace', 'size': 'small'})
     plt.grid()
 
+
     if savefig:
         datestamp = time.strftime("%Y%m%d", gmtime())
         if plotdir is None:
@@ -338,6 +344,12 @@ def plot_vista_tiles(table=None, ra=None, dec=None, PA=90.0,
             'radec_vista_tiles_' + datestamp + '.png'
         print('Saving:' + figname)
         plt.savefig(plotdir + figname)
+
+    if pause:
+        raw_input("Enter any key to continue: ")
+
+    if showplot:
+        plt.show()
 
 
 def rd_ExecutionTimes(table=None, debug=False):
@@ -503,6 +515,10 @@ def aitoff_test(ra, dec):
 
     print('Elapsed time(secs):', time.time() - t0)
 
+    if showplot:
+        plt.show()
+
+
     aitoff = True
     PA = 90.0
     color = 'blue'
@@ -553,8 +569,14 @@ def aitoff_test(ra, dec):
 
     print('Plotting the shaded tiles')
 
+    if showplot:
+        plt.show()
 
-def plot_status_notcompleted(table, raUnits='hour', wrap_ra24hr=False):
+
+
+def plot_status_notcompleted(table,
+                             raUnits='hour',
+                             wrap_ra24hr=False):
     """
 
 
@@ -656,6 +678,9 @@ def save_radec(table):
     print('Saving: ' + figname)
     plt.savefig('./' + figname)
 
+    if showplot:
+        plt.show()
+
     savefile = 'tmp.fits'
     print('Saving: ', savefile)
     print('Number of rows:', ndata)
@@ -699,79 +724,65 @@ def plot_despolygon(table=None,
     plt.savefig('./' + figname)
 
 
+def getargs(verbose=False):
+    """
+    Based on template getargs function
+
+    Usage
+
+    python getargs.py --help
 
 
-def plot_skycoords_plot(xdata, ydata,
-                        label=None, ilabel=0,
-                        color='red', linestyle=None,
-                        wrap_ra24hr=False, units='degrees'):
+    def getargs():
+
+    ....
+
+    if __name__=='__main__':
+
+        args = getargs()
+        debug = args.debug()
+
+
+
+    parse command line arguements
+
+    not all args are active
+
     """
 
-
-    """
-    print('plot_skycoords_plot; label:', label, ilabel)
-
-    # add plot legend label to first segment in series
-    if ilabel == 0:
-        plt.plot(xdata, ydata,
-                 linestyle=linestyle,
-                 color=color, label=label)
-        ilabel = 1
-
-    if ilabel != 0:
-        plt.plot(xdata, ydata,
-                 linestyle=linestyle,
-                 color=color)
-
-    if units == 'degree':
-        if wrap_ra24hr:
-            plt.xlim([-180.0, 180.0])
-        else:
-            plt.xlim([0.0, 360.0])
-
-    if not aitoff and units == 'hour':
-        if wrap_ra24hr:
-            plt.xlim([-12.0, 12.0])
-        else:
-            plt.xlim([0.0, 24.0])
-
-    if not aitoff:
-        plt.ylim([-90.0, +90.0])
-
-    return ilabel
-
-
-if __name__ == '__main__':
-
-    import os
     import sys
-
-    import doctest
-    doctest.testmod()
-
-    print('os.path.basename(sys.argv[0]): ', os.path.basename(sys.argv[0]))
-    print('__file__: ', __file__)
-    print(os.path.splitext(__file__)[0])
-    # strip off file extension
-    global appname
-    appname = os.path.splitext(__file__)[0]
-    print('Appname: ', appname)
-
-    import ConfigParser
-
+    import pprint
     import argparse
-    # from argparse import ArgumentParser
 
-    global t0
+    # there is probably a version function out there
+    __version__ = '0.1'
+
+
+    description='OB progress analysis (see also IDL version ob_progress)'
+    epilog = """WARNING: Not all options may be supported
+             """
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='OB progress analysis (see also IDL version ob_progress)'
-    )
+        description=description,
+        epilog=epilog)
 
-    t0 = time.time()
 
-    date_default = time.strftime("%Y%m%d", gmtime())
+
+
+    parser =  argparse.ArgumentParser(
+        description=description, epilog=epilog,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+
+    # the destination defaults to the option parameter
+    # defaul=False might not be needed
+
+    parser.add_argument("--infile",
+                        help="Input file name")
+
+
+
     parser.set_defaults(date=date_default)
     parser.add_argument(
         "--date", default=date_default,
@@ -862,6 +873,10 @@ if __name__ == '__main__':
     parser.add_argument("--pause", action="store_true",
                         dest='pause', help="turn on pausing option")
 
+    parser.add_argument("--showplot", action="store_true",
+                        help="turn on show plot")
+
+
     # parser.add_argument("-t", "--test", action="store_true", dest="test",
     #              default="", help="run tests")
 
@@ -870,20 +885,51 @@ if __name__ == '__main__':
                         default="", help="print version number and  exit")
 
     print('Number of arguments:', len(sys.argv), 'arguments: ', sys.argv[0])
+
     args = parser.parse_args()
 
     if args.version:
         print('version:', __version__)
         sys.exit(0)
 
-    pause = False
-    if args.pause:
-        pause = True
-
     iarg = 0
     for arg in vars(args):
         iarg = iarg + 1
         print('Argument:', str(iarg) + ':', arg, '=', getattr(args, arg))
+
+    return args
+
+
+if __name__ == '__main__':
+
+    import os
+    import sys
+
+    import ConfigParser
+
+    import doctest
+    doctest.testmod()
+
+    global appname
+    global t0
+
+    print('os.path.basename(sys.argv[0]): ', os.path.basename(sys.argv[0]))
+    print('__file__: ', __file__)
+    print(os.path.splitext(__file__)[0])
+    # strip off file extension
+
+    appname = os.path.splitext(__file__)[0]
+    print('Appname: ', appname)
+
+    t0 = time.time()
+
+    date_default = time.strftime("%Y%m%d", gmtime())
+
+    args = getargs()
+
+    pause = False
+    if args.pause:
+        pause = True
 
     # only supports 1 or all for now until I add parsing of string like
     # in IDL version
@@ -924,6 +970,7 @@ if __name__ == '__main__':
     decrange = args.decrange
     print('Dec range:', decrange)
 
+    showplot = args.showplot
 
     # no changes should be needed below
 
@@ -1086,9 +1133,15 @@ if __name__ == '__main__':
     # if pause: raw_input("Enter any key to continue: ")
 
     plot_skycoords(overplot=False,
-                   wrap_ra24hr=True, units='hour', label=None)
-    plot_skycoords(overplot=True, system='Ecliptic', wrap_ra24hr=True,
+                   wrap_ra24hr=True,
                    units='hour', label=None)
+    if pause:
+        raw_input("Enter any key to continue: ")
+
+    plot_skycoords(overplot=True, system='Ecliptic',
+                   wrap_ra24hr=True,
+                   units='hour',
+                   label=None)
     if pause:
         raw_input("Enter any key to continue: ")
 
@@ -1098,6 +1151,7 @@ if __name__ == '__main__':
     plot_vista_tiles(table=table,
                      ra=ra[COMPLETED], dec=dec[COMPLETED],
                      aitoff=aitoff, overplot=overplot,
+                     showplot=showplot,
                      verbose=verbose, debug=debug,
                      wrap_ra24hr=wrap_ra24hr, label=label,
                      alpha=1.0, color='none',
@@ -1108,13 +1162,23 @@ if __name__ == '__main__':
 
     plot_skycoords(overplot=overplot, wrap_ra24hr=wrap_ra24hr,
                    units=raUnits,
+                   showplot=showplot,
                    label=None)
+    if pause:
+        raw_input("Enter any key to continue: ")
+
     plot_skycoords(overplot=overplot, system='Ecliptic',
                    wrap_ra24hr=wrap_ra24hr,
                    units=raUnits, label=None)
+    if pause:
+        raw_input("Enter any key to continue: ")
 
     plot_despolygon(table=despolygon, label=None, raUnits=raUnits,
                     wrap_ra24hr=wrap_ra24hr)
+    if pause:
+        raw_input("Enter any key to continue: ")
+
+
     plt.grid()
 
     if pause:
@@ -1239,6 +1303,8 @@ if __name__ == '__main__':
         figfile = figpath + '/' + 'ob_progress_des_viking_' + datestamp + '.png'
         print('Saving: ' + figfile)
         plt.savefig(figfile)
+
+
 
     print('Completed plotting the shaded tiles')
     if pause:
