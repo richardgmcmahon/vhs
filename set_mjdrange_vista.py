@@ -1,12 +1,13 @@
 """ make Python 2.7 and 3.x compatible """
 from __future__ import print_function, division
 
-def set_mjdrange_vista(period=86, verbose=True, debug=False, test=False):
+def set_mjdrange_vista(period=86,
+                       verbose=True, debug=False, test=False):
   """ returns mjd range for ESO periods for VISTA public surveys
 
   based on set_mjdrange_vista.pro which is based on set_mjdrange_ukidss
 
-  could be generalised to support ESO generically with a Dry Run be
+  could be generalised to support ESO generically with a Dry Run as
   an exception
 
   To set the date from the start of the P84 to the end of P86, use
@@ -65,7 +66,8 @@ def set_mjdrange_vista(period=86, verbose=True, debug=False, test=False):
   # VISTA periods
   p84_VISTA_date_range = [[2009, 10, 1], [2010, 2, 28]]
   dryrun_date_range = p84_VISTA_date_range
-  # not that VISTA p85 started on March 1st
+  # not that VISTA p85 started on March 1st 2010 and not April 1st 2010
+  # so we call it p85v here
   p85vISTA_date_range = [[2010,3,1],[2010,9,30]]
 
   # Normal ESO periods
@@ -75,6 +77,7 @@ def set_mjdrange_vista(period=86, verbose=True, debug=False, test=False):
   p87_date_range=[[2011,4,1],[2011,9,30]]
   p88_date_range=[[2011,10,1],[2012,3,31]]
 
+  #
   year=1967
   month=9
   end_of_month=calendar.monthrange(year, month)[1]
@@ -88,6 +91,7 @@ def set_mjdrange_vista(period=86, verbose=True, debug=False, test=False):
 
   #datetime.date(2011, 1, 31)
 
+  # Here we try to generate any period starting from ESO Period 1
   # ESO Observing Period 1
   year1 = 1968
   month1 = 10
@@ -177,8 +181,10 @@ def set_mjdrange_vista(period=86, verbose=True, debug=False, test=False):
 
   print('p86_date_range: ',   p86_date_range)
 
-  raw_input("Enter any key to continue: ")
+  if debug:
+    raw_input("Enter any key to continue: ")
 
+  # ESO Period 1
   start_year = 1967
   start_month = 10
   end_of_month = calendar.monthrange(start_year, start_month)[1]
