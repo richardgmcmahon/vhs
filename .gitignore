@@ -1,0 +1,10 @@
+# ignore all files
+*
+*.cfg
+# Can also ignore all directories and files in a directory.
+tmp/*/* 
+# 
+!.gitignore
+!*.py
+!*.sql
+!**/phase3/**
