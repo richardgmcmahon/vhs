@@ -1,0 +1,48 @@
+Create progress plots upto obs date 20170331
+Reads ESO progress file which contains all submitted OBs. i.e observed
+and unobserved OBs.
+
+e.g. more /data/vhs/progress/20170331/179A2010.csv
+more /data/vhs/progress/20170331/179A2010.fits
+
+python ob_progress.py --date 20170331
+
+ob_progress_179A2010.fits_20170331_radec_vista_tiles_20190329.png
+
+Plot only completed OBs since these should be in the date release
+python ob_progress.py --date 20170331 --obstatus C
+
+Full set of options in ob_progress.pro
+
+more ob_progress.pro.20170705
+;$Id: ob_progress.pro,v 1.4 2011/11/12 12:46:58 rgm Exp rgm $
+pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
+ verbose=verbose, debug=debug, pause=pause, $
+ ps=ps, $
+ incomplete=incomplete, survey=survey, runs=runs, $
+ date=date, executed=executed, any=any, sdss=sdss, obstatus=obstatus, $
+ batch=batch, reverse=reverse, wrfits=wrfits, $
+ wise=wise, $
+ ukidss=ukidss, overlap=overlap, $
+ format=format, tiles=tiles, pawprints=pawprints, $
+ rarange=rarange, decrange=decrange,$
+ near=near, duplicity=duplicity, $
+ exclude=exclude, polyfill=polyfill, title=title, $
+ waveband=waveband, sgp=sgp, $
+ clean_des=clean_des, $
+ desfoot=desfoot, $
+ desfile=desfile, $
+ despolygon=despolygon,  overplot_despolygon=overplot_despolygon, $
+ vstatlas=vstatlas, vstfile=vstfile, $
+ plotpath=plotpath, label=label, $
+ nofootprints=nofootprints, $
+ publication=publication, $
+ dust=dust, $
+ hermes=hermes, $
+ gaia=gaia, $
+ spt=spt, $
+ viking=viking, video=video, $
+ pngsize=pngsize, $
+ filtername=filtername, $
+ dqc=dqc, $
+ extra=extra
