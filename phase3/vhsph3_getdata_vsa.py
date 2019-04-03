@@ -60,8 +60,8 @@ print('astropy.__version__: ', astropy.__version__)
 from astropy.table import Table
 
 # sys.path.append('/home/rgm/soft/libdqc/')
-sys.path.append('/home/rgm/soft/python/lib/ssm/')
-import AstroUtils
+#sys.path.append('/home/rgm/soft/python/lib/ssm/')
+#import AstroUtils
 
 sys.path.append('/home/rgm/soft/python/lib/librgm/')
 import table_stats
