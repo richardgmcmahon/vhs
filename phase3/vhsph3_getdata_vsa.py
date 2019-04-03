@@ -220,7 +220,7 @@ if not args.test:
     print('outpath:', outpath)
     if not os.path.isdir(outpath):
         print('outpath:', outpath)
-        os.mkdir(outpath)
+        os.makedirs(outpath)
 
     framesetid = '472446402561'
     framesetid = fsids[0]
