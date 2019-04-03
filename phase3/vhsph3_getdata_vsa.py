@@ -86,23 +86,39 @@ logging.info("Timestamp logging info")
 #                                        'baz': 'evil'})
 # Set the third, optional argument of get to 1 if you wish to use raw mode.
 
+# top level config object
 config = ConfigParser.ConfigParser()
+
+# config object for login credentials
 config_vsa_login = ConfigParser.ConfigParser()
 
 configfile_vsa_login = 'vhs_vsa_login.cfg'
 config_vsa_login.read(configfile_vsa_login)
 
+
+
 username = config_vsa_login.get('DEFAULT', 'username')
 password = config_vsa_login.get('DEFAULT', 'password')
 community = config_vsa_login.get('DEFAULT', 'community')
+config_vsa_login = ConfigParser.ConfigParser()
 
 
 configfile = 'vhsph3_getdata_vsa.cfg'
 config.read(configfile)
 
+# read the credentials config filename
+configfile_vsa_login = config.get('VSA-VHS', 'login_credentials')
+
+# read the credentials from private config file
+config_vsa_login.read(configfile_vsa_login)
+username = config_vsa_login.get('DEFAULT', 'username')
+password = config_vsa_login.get('DEFAULT', 'password')
+community = config_vsa_login.get('DEFAULT', 'community')
+config_vsa_login = ConfigParser.ConfigParser()
+
+# read other configuration options
 host = config.get('VSA-VHS', 'host')
 archive = config.get('VSA-VHS', 'archive')
-
 
 # outpath = '/data/vhs/vsa/VHSv20120417/tmp/'
 # outpath = '/data/vhs/vsa/VHSv20120417/phase3_dr2_tmp1/'
