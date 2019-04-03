@@ -1,0 +1,41 @@
+
+20190206
+
+(1) Get the VSA bandemerged catalogue by frameset
+
+vhsph3_getdata_vsa.py
+
+
+
+20140422
+
+1) mk_ph3cathdr.batch
+
+runs mk_ph3cat.pro
+to make
+
+2) mk_ph3cat_mfile.batch
+
+runs mk_ph3cat.pro
+to make a ESO Phase 3 metadata file
+
+3) mk_ph3cat.batch
+
+20140731
+
+Sophie's code is in:
+
+
+
+get it from VSA
+
+
+/data/vhs/vsa/VHSv20120417/
+
+see also
+
+/data/vhsardata
+
+
+
+VSA: 
