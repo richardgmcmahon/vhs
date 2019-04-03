@@ -63,8 +63,8 @@ from astropy.table import Table
 #sys.path.append('/home/rgm/soft/python/lib/ssm/')
 #import AstroUtils
 
-sys.path.append('/home/rgm/soft/python/lib/librgm/')
-import table_stats
+#sys.path.append('/home/rgm/soft/python/lib/librgm/')
+#import table_stats
 
 logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%m-%d-%Y %I:%M:%S %p:',
