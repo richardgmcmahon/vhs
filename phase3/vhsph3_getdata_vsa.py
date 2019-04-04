@@ -66,6 +66,144 @@ from astropy.table import Table
 #sys.path.append('/home/rgm/soft/python/lib/librgm/')
 #import table_stats
 
+
+def getargs(verbose=False):
+    """
+
+    Template getargs function
+
+    Usage
+
+    python getargs.py --help
+
+
+    def getargs():
+
+    ....
+
+    if __name__=='__main__':
+
+        args = getargs()
+        debug = args.debug()
+
+
+
+    parse command line arguements
+
+    not all args are active
+
+    """
+    import sys
+    import pprint
+    import argparse
+
+    # there is probably a version function out there
+    __version__ = '0.1'
+
+
+    description = '''Download VHS data tile by tile from VSA'''
+    epilog = '''Work in progress'''
+
+    parser = argparse.ArgumentParser(
+        description=description, epilog=epilog,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+
+    parser.add_argument("-t", "--test",
+                        action="store_true", default=False,
+                        help="run test")
+
+
+    parser.add_argument("--force",
+                        action="store_true", default=False,
+                        help="force overwrite of existing data and lockfiles")
+
+
+
+    parser.add_argument("-l", "--limit",
+                        action="store_true", default=False,
+                        help="limit SQL to 100 rows with TOP ")
+
+    parser.add_argument("-i", "--input", help="input metadata file")
+
+    parser.add_argument("-q", "--query",
+                        help="specify query on the command line")
+
+    parser.add_argument("-f", "--format", default='.fits.gz',
+                        help="Output format (csv/fits/fits.gz/html)")
+
+    parser.add_argument("-o", "--output", help="Output filename")
+
+    parser.add_argument("--config", help="Specify the config  file",
+                        default='./')
+
+    parser.add_argument("--outpath", help="Output path", default='./')
+
+    parser.add_argument(
+        "-e", "--email", default='',
+        help="Email address for results of long queries; should not be used when batch processing is required")
+
+    # args.db = 'VHSv20120926'
+    # args.db = 'VHSv20130417'
+    # args.db = 'VHSDR2'
+    # args.db = 'VHSv20140517'
+    parser.set_defaults(db='VHSv20160507')
+    parser.add_argument("-d", "--db", dest="db",
+                        help="VSA Database to use")
+
+    default_release = 'VHSDR2'
+    parser.add_argument("--dr", dest="release", default=default_release,
+                        help="VSA Data release to use")
+
+    parser.add_argument("--configfile",
+                        default=None,
+                        help="configuration file")
+
+    parser.add_argument("--debug",
+                        action="store_true", default=False,
+                        help="run in debug mode")
+
+    parser.add_argument("--verbose", default=verbose,
+                        action='store_true',
+                        help="verbose option")
+
+    parser.add_argument("--version", action='store_true',
+                        help="verbose option")
+
+
+    args = parser.parse_args()
+
+
+    if args.debug or args.verbose:
+        print()
+        print('Number of arguments:', len(sys.argv),
+              'arguments: ', sys.argv[0])
+
+    if args.debug or args.verbose:
+       print()
+       for arg in vars(args):
+          print(arg, getattr(args, arg))
+
+
+    if args.debug or args.verbose:
+        print()
+        pprint.pprint(args)
+
+    if args.version:
+        print('version:', __version__)
+        sys.exit(0)
+
+
+    return args
+
+
+if __name__=='__main__':
+
+    args = getargs(verbose=True)
+
+
+
+
 logging.basicConfig(format='%(asctime)s %(message)s',
                     datefmt='%m-%d-%Y %I:%M:%S %p:',
                     level=logging.INFO)
@@ -92,29 +230,21 @@ config = ConfigParser.ConfigParser()
 # config object for login credentials
 config_vsa_login = ConfigParser.ConfigParser()
 
-configfile_vsa_login = 'vhs_vsa_login.cfg'
-config_vsa_login.read(configfile_vsa_login)
-
-
-
-username = config_vsa_login.get('DEFAULT', 'username')
-password = config_vsa_login.get('DEFAULT', 'password')
-community = config_vsa_login.get('DEFAULT', 'community')
-config_vsa_login = ConfigParser.ConfigParser()
-
-
 configfile = 'vhsph3_getdata_vsa.cfg'
+print('Reading config file:', configfile)
 config.read(configfile)
 
 # read the credentials config filename
 configfile_vsa_login = config.get('VSA-VHS', 'login_credentials')
 
 # read the credentials from private config file
+print('Reading VSA login credentials config file:', configfile_vsa_login)
 config_vsa_login.read(configfile_vsa_login)
 username = config_vsa_login.get('DEFAULT', 'username')
 password = config_vsa_login.get('DEFAULT', 'password')
 community = config_vsa_login.get('DEFAULT', 'community')
 config_vsa_login = ConfigParser.ConfigParser()
+
 
 # read other configuration options
 host = config.get('VSA-VHS', 'host')
@@ -132,58 +262,6 @@ outpath = config.get('DEFAULT', 'outpath')
 dqcpath = config.get('DEFAULT', 'dqcpath')
 dqcfilename = config.get('DEFAULT', 'dqcfilename')
 
-description = '''Download VHS data tile by tile from VSA'''
-epilog = '''Work in progress'''
-
-parser = argparse.ArgumentParser(
-    description=description, epilog=epilog,
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-
-parser.add_argument("-t", "--test",
-                    action="store_true", default=False,
-                    help="run test")
-
-parser.add_argument("--debug",
-                    action="store_true", default=False,
-                    help="run in debug mode")
-
-parser.add_argument("-l", "--limit",
-                    action="store_true", default=False,
-                    help="limit SQL to 100 rows with TOP ")
-
-parser.add_argument("-i", "--input", help="input metadata file")
-
-parser.add_argument("-q", "--query",
-                    help="specify query on the command line")
-
-parser.add_argument("-f", "--format", default='.fits.gz',
-                    help="Output format (csv/fits/fits.gz/html)")
-
-parser.add_argument("-o", "--output", help="Output filename")
-
-parser.add_argument("--config", help="Specify the config  file",
-                    default='./')
-
-parser.add_argument("--outpath", help="Output path", default='./')
-
-parser.add_argument(
-    "-e", "--email", default='',
-    help="Email address for results of long queries; should not be used when batch processing is required")
-
-# args.db = 'VHSv20120926'
-# args.db = 'VHSv20130417'
-# args.db = 'VHSDR2'
-# args.db = 'VHSv20140517'
-parser.set_defaults(db='VHSv20160507')
-parser.add_argument("-d", "--db", dest="db",
-                    help="VSA Database to use")
-
-default_release = 'VHSDR2'
-parser.add_argument("--dr", dest="release", default=default_release,
-                    help="VSA Data release to use")
-
-args = parser.parse_args()
 
 debug = args.debug
 
@@ -387,3 +465,6 @@ for fsid in fsids:
 
 
 print('Elapsed time(secs):', time.time() - t0)
+
+
+#if __name__ == '__main__':
