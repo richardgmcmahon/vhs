@@ -1,0 +1,147 @@
+103,104d102
+< 
+< 
+121c119
+<  CGTimeStamp(11, RANDOM_DIGITS=2, /UTC) + '.logfile'
+---
+>  cgtimestamp(11, RANDOM_DIGITS=2, /UTC) + '.logfile'
+164a163
+> message,/inf,'filename = ' + filename 
+219c218
+<   set_mjdrange,mjdrange,dr=dr, verbose=verbose
+---
+>   set_mjdrange,mjdrange, dr=dr, verbose=verbose
+223d221
+< 
+226,228c224,225
+< 
+<   upto_period=-1
+<   from_period=-1
+---
+>   upto_period = -1
+>   from_period = -1
+231d227
+<   print, 'n_elements(esoperiod): ', n_elements(esoperiod)
+232a229
+>   print, 'n_elements(esoperiod): ', n_elements(esoperiod)
+234c231
+<   nperiods=n_elements(esoperiod)
+---
+>   nperiods = n_elements(esoperiod)
+236a234,235
+>     splog, traceback()
+>     message,/inf,'ESO period: ' + esoperiod
+238a238,239
+> 
+>     ; check for to or from period options
+241c242,248
+<       if ipos ge 0 then upto_period=1
+---
+>       if ipos ge 0 then begin
+>           upto_period = 1
+>           print, 'upto_period:', upto_period
+>           ipos=strpos(strlowcase(esoperiod), 'p')
+>           esoperiod_upper = strmid(esoperiod, ipos)
+>           print, 'esoperiod_upper: ', esoperiod_upper
+>       endif
+243c250,256
+<       if ipos ge 0 then from_period=1
+---
+>       if ipos ge 0 then begin
+>           from_period=1
+>           print, 'from_period:', from_period
+>           ipos=strpos(strlowcase(esoperiod), 'p')
+>           esoperiod_lower = strmid(esoperiod, ipos)
+>           print, 'esoperiod_lower:', esoperiod_lower
+>       endif
+245,253d257
+<     ipos=strpos(strlowcase(esoperiod), 'p')
+<     esoperiod=strmid(esoperiod, ipos)
+<     message,/inf,'ESO period: ' + esoperiod
+< 
+<     ipos=strpos(strlowcase(esoperiod), 'p')
+<     print, 'ipos: ', ipos
+<     if ipos gt 0 then upto_period=1
+<     esoperiod=strmid(esoperiod, ipos)
+<     message,/inf,'ESO period: ' + esoperiod
+257,259d260
+<   pause
+< 
+< 
+265,271c266,268
+<     esoperiod=esoperiod_lower
+<   endif
+< 
+<   pause
+< 
+<   set_mjdrange_vista, mjdrange, period=esoperiod, verbose=verbose
+<   message,/inf,'ESO Period date ranges: ' + esoperiod 
+---
+>      
+>     set_mjdrange_vista, mjdrange_lower, period=esoperiod_lower, verbose=verbose
+>     mjdrange[0]=mjdrange_lower[0]     
+273d269
+<   if nperiods eq 2 then begin
+278,279d273
+<   pause
+< 
+280a275
+>     print, 'Get dates for upto Period: ', esoperiod_upper
+282c277,280
+<     mjdrange[0]=mjdrange_test[0]
+---
+>     mjdrange[0] = mjdrange_test[0]
+>     set_mjdrange_vista, mjdrange_test, period=esoperiod_upper
+>     mjdrange[1] = mjdrange_test[1]
+>     print, 'mjdrange: ', mjdrange
+289,290d286
+<   if nperiods gt 0 then begin
+< 
+292c288
+<    'MJD: ' + STRING(mjdrange[0]) + STRING(mjdrange[1]) 
+---
+>           'MJD: ' + STRING(mjdrange[0]) + STRING(mjdrange[1]) 
+294,295c290
+<    MJD_ISODATE(mjdrange[0]) + '  ' + MJD_ISODATE(mjdrange[1])
+< 
+---
+>           MJD_ISODATE(mjdrange[0]) + '  ' + MJD_ISODATE(mjdrange[1])
+298,301c293,294
+< 
+< pause
+< 
+< end
+---
+> print, 'Type any chatacter to contine >'
+> key = get_kbrd(1)
+306d298
+< 
+407c399
+< print, 'phase3 = ', phase3
+---
+> ;print, 'phase3 = ', phase3
+436c428
+< pause
+---
+> pause, batch=batch
+674a667,668
+> wavebands=strtrim(wavebands,2)
+> 
+684a679
+> wavebands=strtrim(wavebands,2)
+708a704,705
+> wavebands=strtrim(wavebands,2)
+> 
+1150a1148,1149
+> pause, batch=batch
+> 
+1520c1519
+<  wavebands=wavebands
+---
+>  wavebands=wavebands, batch=batch
+1523c1522
+<  wavebands=wavebands
+---
+>  wavebands=wavebands, batch=batch
+1533a1533
+> message, /inf, 'DQC filename completed: ' + filename
