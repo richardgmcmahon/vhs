@@ -46,3 +46,34 @@ pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
  filtername=filtername, $
  dqc=dqc, $
  extra=extra
+
+Full set of options in dqc_analysis.pro
+; $Id: dqc_analysis.pro,v 1.5 2007/03/14 09:17:20 rgm Exp rgm $
+pro dqc_analysis,   phase3=phase3, $
+  data=data, chipid=chipid, $
+  qcstatus=qcstatus, $
+  wsa=wsa, casu=casu, vsa=vsa, $
+  vircam=vircam, wfcam=wfcam, $
+  survey=survey, sv=sv, dryrun=dryrun, $
+  filename=filename, esoperiod=esoperiod, $
+  mf=mf, $
+  drelease=drelease, zone=zone, $
+  gps=gps, yband=yband, kband=kband, $
+  ngp=ngp, sgp=sgp, $
+  verbose=verbose, debug=debug, $
+  stripe82=stripe82,cadence=cadence,msbstats=msbstats, $
+  vhs=vhs, viking=viking, $
+  offsets=offsets, $
+  check_radec=check_radec, $
+  report=report, ab=ab,$
+  pause=pause, $
+  airmass_range=airmass_range, $
+  mjd_range=mjd_range, $
+  tagnames=tagnames, label=label, $
+  linethickness=linethickness, $
+  pawprint=pawprint, tile=tile, $
+  batch=batch, plotpath=plotpath, filelabel=filelabel, $
+  publication=publication, $ ; removes annotation
+  polyfill=polyfill, $ ; plots sky coverage using polygons
+  dqc_qcstatus=dqc_qcstatus, $
+  ob_stats=ob_stats
