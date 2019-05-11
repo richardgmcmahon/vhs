@@ -1,0 +1,9 @@
+.com qc_compare_casu_vsa
+
+path= '/data/vhs/vsa/dr1/'
+filename = 'vhsdr1_bge30_join_2mass.fits'
+vsacat= path + filename
+
+verbose=1
+qc_compare_casu_vsa, casucat=casucat, vsacat=vsacat, $
+ verbose=verbose, tmass=1
