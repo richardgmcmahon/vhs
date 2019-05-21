@@ -11,7 +11,7 @@ pro vhs_icrf_analysis, rfc=rfc, $
 ;
 ;  publication=True: plot without annotation
 ;
-;
+; usage: vhs_icrf_analysis, /rfc, /pub
 ;-
 
 COMPILE_OPT idl2
@@ -340,7 +340,7 @@ endif
 binsize=0.05
 if keyword_set(dr7) or keyword_set(dr8) then binsize=0.02
 
-summary=1
+;summary=1
 radius=1.0
 title=filename
 charsize=1.2
@@ -351,11 +351,24 @@ if keyword_set(ukidssXiXn) then psym=3
 ndata=n_elements(dra)
 if ndata gt 100000 then binsize=0.01
 if publication then charsize=1.7
+
 nearneigh_plots, dra, ddec, dr_gcirc, $
  radius=radius, binsize=binsize, label=label, $
  title=title, sidelabel=sidelabel, datestamp=datestamp, $
- nplots=nplots,summary=summary, batch=batch, $
+ nplots=nplots, /summary, batch=batch, $
  charsize=charsize, psym=psym, publication=publication, psplot=psplot
+
+
+
+summary = 1
+nearneigh_plots, dra, ddec, dr_gcirc, $
+ radius=radius, binsize=binsize, label=label, $
+ title=title, sidelabel=sidelabel, datestamp=datestamp, $
+ nplots=nplots, summary=summary, batch=batch, $
+ charsize=charsize, psym=psym, publication=publication, psplot=psplot
+
+
+
 
 
 
