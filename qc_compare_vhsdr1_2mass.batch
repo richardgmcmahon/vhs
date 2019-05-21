@@ -5,5 +5,7 @@ filename = 'vhsdr1_bge30_join_2mass.fits'
 vsacat= path + filename
 
 verbose=1
+waveband = 'J'
 qc_compare_casu_vsa, casucat=casucat, vsacat=vsacat, $
+ waveband=waveband, $
  verbose=verbose, tmass=1
