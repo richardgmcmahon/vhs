@@ -77,6 +77,7 @@ if not keyword_set(tmass) then begin
 
 endif
 
+; use this for file from VSA that is already matched to 2MASS
 if keyword_set(tmass) then begin
 
   tag_test = waveband + '_X'
@@ -133,10 +134,12 @@ ra2 = ra2[m2]
 dec2 = dec2[m2]
 
 
+; here is the overloading bodge where ra1 = 'waveband'_X e.g. J_X
 if keyword_set(tmass) then begin
-  tag_test=waveband + '_X'
-  itag = tag_indx(vsa, tag_test)
-  ra1 = vsa[itest].(itag)
+   tag_test = waveband + '_X'
+   ; get the column of interest by column number; tag is the column name
+   itag = tag_indx(vsa, tag_test)
+   ra1 = vsa[itest].(itag)
 
   tag_test=waveband + '_Y'
   itag = tag_indx(vsa, tag_test)
@@ -164,16 +167,17 @@ xgrid=make_array(nbins, /double)
 ygrid=make_array(nbins, /double)
 ugrid=make_array(nbins, nbins, /double)
 vgrid=make_array(nbins, nbins, /double)
-print, 'Compute the systematics in a grid:', nbins, nbins
+print, 'Compute the systematics in a pixel space grid:', nbins, nbins
 for i=0, nbins-1 do begin
   grid_ramin = ramin + (i*rabin)
   grid_ramax= grid_ramin + rabin
-  xgrid[i]=(grid_ramin+grid_ramax)/2.0
+  xgrid[i] = (grid_ramin + grid_ramax)/2.0
   for j=0, nbins-1 do begin
     print, '2dbin: ', i, j
     grid_decmin = decmin + (j*decbin)
     grid_decmax= grid_decmin + decbin
     ygrid[j]=(grid_decmin+grid_decmax)/2.0
+    ; determine ojects in the grid cell with limits grid_ramin, etc
     itest=where(ra1 ge grid_ramin and ra1 le grid_ramax $
       and dec1 ge grid_decmin and dec1 le grid_decmax, count)
     ugrid[i,j] = median(dra[itest])
