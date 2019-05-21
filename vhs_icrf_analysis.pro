@@ -33,7 +33,9 @@ endif
 inpath='/data/vhs/icrf/'
 filename='icrs_1_vhs.fits'
 
-if keyword_set(rfc) then filename = 'rfc_2012b_vhs.fits'
+
+; if keyword_set(rfc) then filename = 'rfc_2012b_vhs.fits'
+if keyword_set(rfc) then filename = 'rfc_2019a_vhs_dr5eso.fits'
 
 if keyword_set(viking) then filename = 'rfc_2012b_viking.fits'
 if keyword_set(vmc) then filename = 'rfc_2012b_vmcdr1.fits'
