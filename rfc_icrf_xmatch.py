@@ -55,10 +55,10 @@ def getconfig(configfile=None, debug=False, silent=False):
     print('configfile_default:', configfile_default)
 
     if configfile is None:
+        configfile_default = os.path.splitext(__file__)[0] + '.cfg'
         if debug:
             print('__file__', __file__)
-        configfile_default = os.path.splitext(__file__)[0] + '.cfg'
-        print('configfile_default:', configfile_default)
+            print('configfile_default:', configfile_default)
         configfile = configfile_default
 
     print('Open configfile:', configfile)
