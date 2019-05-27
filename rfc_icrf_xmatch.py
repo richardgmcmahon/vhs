@@ -50,12 +50,16 @@ def getconfig(configfile=None, debug=False, silent=False):
     config = configparser.SafeConfigParser()
 
     print('__file__', __file__)
+    print('configfile:', configfile)
+    configfile_default = os.path.splitext(__file__)[0] + '.cfg'
+    print('configfile_default:', configfile_default)
+
     if configfile is None:
         if debug:
             print('__file__', __file__)
         configfile_default = os.path.splitext(__file__)[0] + '.cfg'
-    if configfile is not None:
-        configfile_default = configfile
+        print('configfile_default:', configfile_default)
+        configfile = configfile_default
 
     print('Open configfile:', configfile)
     if debug:
@@ -97,10 +101,6 @@ def getconfig(configfile=None, debug=False, silent=False):
         print()
 
     return config
-
-
-if __name__ == '__main__':
-
 
 
 def getargs(verbose=False):
@@ -203,6 +203,7 @@ def getargs(verbose=False):
 
 
 if __name__ == '__main__':
+
     import time
 
     t0 = time.time()
@@ -211,8 +212,15 @@ if __name__ == '__main__':
     debug = args.debug
     survey_xmatch = args.survey
 
-    # configfile defaults to rfc_icrf_xmatch.cfg
-    config = getconfig(configfile=None, debug=True)
+    # configfile defaults to
+    configfile = 'rfc_icrf_xmatch.cfg'
+    # config = getconfig(configfile=configfile, debug=debug)
+    config = getconfig(debug=debug)
+    infile = '/data/vhs/icrf/rfc_2019a_cat.radec'
+    path_rfc = config.get('INPUTS', 'path_rfc')
+    filename_rfc = config.get('INPUTS', 'filename_rfc')
+    infile = path_rfc + filename_rfc
+
 
     # change the Vizier timeout in seconds
     print(Vizier.TIMEOUT)
@@ -222,8 +230,6 @@ if __name__ == '__main__':
 
     # help(XMatch)
     # help(XMatch.query)
-
-    infile = '/data/vhs/icrf/rfc_2019a_cat.radec'
 
     cat1 = Table.read(infile, format='ascii')
     cat1.info('stats')
@@ -303,6 +309,8 @@ if __name__ == '__main__':
         itest = np.unique(result['UPLOAD_ID'])
 
     if survey_xmatch != 'VHS':
+        print('cat1:', cat1)
+        print('Vizier xmatch:', cat2)
         result = XMatch.query(cat1=cat1,
                               cat2=cat2,
                               max_distance=1.0 * u.arcsec,
@@ -326,8 +334,8 @@ if __name__ == '__main__':
         dec_rfc = dec_rfc[itest]
 
     if survey_xmatch != 'VHS':
-        ra_rfc = cat1['ra_rfc']
-        dec_rfc = cat1['dec_rfc']
+        ra_rfc = result['ra_rfc']
+        dec_rfc = result['dec_rfc']
 
     ra2 = result[radec_colnames[0]]
     dec2 = result[radec_colnames[1]]
@@ -362,7 +370,7 @@ if __name__ == '__main__':
     ydata = ddec.arcsec
     ndata = len(xdata)
     plt.scatter(xdata, ydata, s=1, label=str(ndata))
-    plt.legend()
+    plt.legend(loc='upper left')
 
     ax = plt.gca()
     dra_median = np.median(dra.arcsec)
