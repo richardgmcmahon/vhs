@@ -87,7 +87,13 @@ help, data
 if keyword_set(debug) then help, data, /str
 if keyword_set(verbose) then structure_stats, data, /sort
 
-mjdobs=data.mjdobs
+itag = which_tag(data,'mjdobs')
+if itag eq -1 then begin
+   itag = which_tag(data,'mjd')
+endif
+itag_mjdobs = itag
+mjdobs=data.(itag_mjdobs)
+
 chipno=data.chipno
 
 ;isort=sort(mjdobs,/info)
@@ -98,8 +104,8 @@ data=data[isort]
 ndata=n_elements(data)
 
 outstring='# Date range: ' + $
-  mjd_isodate(min(data.mjdobs)) + '  ' + $
-  mjd_isodate(max(data.mjdobs))
+  mjd_isodate(min(data.(itag_mjdobs))) + '  ' + $
+  mjd_isodate(max(data.(itag_mjdobs)))
 printf, ilun_resultfile, outstring
 message, /inf, outstring
 
@@ -139,10 +145,17 @@ ra4_tile=0.0
 
 ; set the OB/Tile warning counter to 0
 iwarning=0
+itag = which_tag(data,'filtname')
+if itag eq -1 then begin
+      itag = which_tag(data,'insfilter_id')
+endif   
+itag_filtname = itag
+message,/inf,'itag_filtname= ' + string(itag_filtname)
+
 for i=0, ndata-1 do begin
   npaws=0
   itile=itile+1
-  filter=data[i].filtname
+  filter=data[i].(itag_filtname)
   obid=data[i].obsid
   filter_same=1
   obid_same=1
@@ -150,7 +163,7 @@ for i=0, ndata-1 do begin
   istart=i
   while (filter_same eq 1) and (obid_same eq 1) and (i lt ndata-1) do begin
     ; this looks for the start of a new tile/filter
-    if strpos(data[i+1].filtname, filter) lt 0 then filter_same=-1
+    if strpos(data[i+1].(itag_filtname), filter) lt 0 then filter_same=-1
     ; this looks for the start of a new OB
     if data[i+1].obsid ne obid then obid_same=-1
     ; tile but also finds OBs that are paused and then restarted
