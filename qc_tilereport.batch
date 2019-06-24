@@ -1,0 +1,31 @@
+.com qc_tilereport
+;
+
+path='/data/rgm/vhs/vsa/'
+path='/data/rgm/vhs/casu/'
+path='/data//vhs/dqc/v1.0/'
+;
+file='multiframe_20091219.fits'
+file='multiframedetector_join_mf_ca_20091219.fits'
+file='casu_vircam_qc_20091221.fits'
+
+file='casu_vircam_qc_join_all_20091223.fits'
+file='casu_vircam_qc_join_all_20100104.fits'
+
+file='vistaqc20091130.fits'
+file='vistaqc20100214_vhs.fits'
+
+
+filename=path+file
+
+
+qc_tilereport, filename=filename, /casu, /vircam, /vhs, /verbose
+
+
+;qc_tilereport, filename=filename, /casu, /vircam, /verbose
+
+
+
+
+
+
