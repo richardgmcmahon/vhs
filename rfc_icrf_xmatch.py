@@ -257,6 +257,12 @@ if __name__ == '__main__':
         # UKIDSS DR8
         cat2 = 'vizier:' + 'II/314/las8'
 
+    if survey_xmatch == 'SDSS':
+        # SDSS DR9
+        cat2 = 'vizier:' + 'V/139/sdss9'
+        radec_colnames = ['RAdeg', 'DEdeg']
+
+
     # VIKING
     if survey_xmatch == 'VIKING':
         cat2 = 'vizier:' + 'II/343/viking2'
