@@ -182,9 +182,9 @@ for i=0, ndata-1 do begin
    npaws, npaws/16, $
    data[istart].tplnexp, data[iend].tplnexp, $
    data[istart].tplexpno, data[iend].tplexpno, $
-   data[istart].mjdobs-50000, data[iend].mjdobs-50000, $
-   data[iend].mjdobs-data[istart].mjdobs, $
-   (data[iend].mjdobs-data[istart].mjdobs)*(24.0*60.0), $
+   data[istart].(itag_mjdobs)-50000, data[iend].(itag_mjdobs)-50000, $
+   data[iend].(itag_mjdobs)-data[istart].(itag_mjdobs), $
+   (data[iend].(itag_mjdobs)-data[istart].(itag_mjdobs))*(24.0*60.0), $
    data[istart].dateobs)
   print, outstring
   printf, ilun_resultfile, outstring
@@ -194,19 +194,22 @@ for i=0, ndata-1 do begin
   endif
 
 
-  format='(i6,i8,2x,a,4i10,2x,a)'
+  format='(i6,i8,2x,a,4i10)'
   outstring=string(format=format,$
    itile, data[istart].obsid, $
-   strtrim(mjd_isodate(data[isort[i]].mjdobs),2), $
+   strtrim(mjd_isodate(data[isort[i]].(itag_mjdobs)),2), $
    data[istart].dateobs, data[iend].dateobs, $
-   data[istart].nightobs, data[iend].nightobs, $
-   strtrim(data[istart].obsname,2))
+   data[istart].nightobs, data[iend].nightobs)
+;   strtrim(data[istart].obsname,2))
   print, outstring
   printf, ilun_resultfile, outstring
   if npaws ne 96 then begin
     printf, ilun_warningfile, outstring
   endif
 
+  ; skip old style
+  iskip = 1
+  if iskip eq 1 then begin
   ; some fits data filename info
   format='(i6,i8,i4,2x,a,2x,a)'
   outstring= string(format=format, $
@@ -219,7 +222,8 @@ for i=0, ndata-1 do begin
   if npaws ne 96 then begin
     printf, ilun_warningfile, outstring
   endif
-
+  endif
+  
   ; analyze the pawprint centres specified in header: RA, Dec
   ramin=min(data[istart:iend].ra)
   ramax=max(data[istart:iend].ra)
