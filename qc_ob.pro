@@ -151,6 +151,7 @@ if tag_indx(data,ytag) lt 0 then ytag='maglim'
 qc_ob_plot_mjd_tag, data, ytag, obid, psym=2
 
 plotfile ='dqc_ob_' + strtrim(string(obid),2) + '_a.png'
+plotid
 pause, plotfile=plotfile, batch=batch
 
 ytag='az'
@@ -166,6 +167,7 @@ ytag='windsp'
 qc_ob_plot_mjd_tag, data, ytag, obid, psym=2
 
 plotfile ='dqc_ob_' + strtrim(string(obid),2) + '_b.png'
+plotid
 pause, plotfile=plotfile, batch=batch
 
 ytag='apcor3'
@@ -182,7 +184,8 @@ qc_ob_plot_mjd_tag, data, ytag, obid, psym=2
 
 
 plotfile ='dqc_ob_' + strtrim(string(obid),2) + '_c.png'
-pause, plotfile=plotfile ,/force, batch=batch
+plotid
+pause, plotfile=plotfile, /force, batch=batch
 
 ytag='amend'
 qc_ob_plot_mjd_tag, data, ytag, obid, psym=2
@@ -194,6 +197,7 @@ ytag='expno'
 qc_ob_plot_mjd_tag, data, ytag, obid, psym=2
 
 plotfile ='dqc_ob_' + strtrim(string(obid),2) + '_d.png'
+plotid
 pause, plotfile=plotfile ,/force, batch=batch
 
 !p.multi = [0,2,2]
