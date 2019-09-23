@@ -138,10 +138,11 @@ def plot_sadt_tile(sadtfile=None, sadtfiles=None, sadtfile_path=None,
         filelist = sadtfiles
 
     print('sadtfile_path: ', sadtfile_path)
+    print('Number of files in filelist:', len(filelist))
     print('filelist:', filelist)
     ifile=0
     for file in filelist:
-      ifile=ifile+1
+      ifile = ifile + 1
       print('reading file: ', file)
       #if sadtfile_path is not None:
       #    sadtfile = sadtfile_path + '/' + file
@@ -162,7 +163,6 @@ def plot_sadt_tile(sadtfile=None, sadtfiles=None, sadtfile_path=None,
       print('Path: ', os.path.dirname(sadtfile))
       sadt.meta['inpath']=os.path.dirname(sadtfile)
       sadt.meta['filename'+str(ifile)]=sadtfile
-
 
   print('Number of SADT tiles: ', len(sadt))
   print(sadt.colnames)
