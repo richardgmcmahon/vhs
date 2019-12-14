@@ -41,7 +41,7 @@ pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
 ;RA (hrs)      DEC (deg) 
 ;container_id seeing sky_transparency
 ;
-;
+; ESO OB Status codes see PP2P manual
 ; Status ’+’ (Accepted)
 ; Status ’-’ (Rejected)
 ; Status ’A’ (Aborted)
@@ -52,6 +52,58 @@ pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
 ; Status ’P’ (Partially defined)
 ; Status ’S’ (Started)
 ; Status 'X' 
+; Status 'T' (Terminated)
+;
+;
+; Status ’D’ (defined): an OB is considered to be fully defined, and its
+; status changes automatically to D, as soon as it reaches the ESO Database.
+; In the ESO Database an OB keeps the status D until a support astronomer
+; starts reviewing it. OBs with status D can still be checked out and then
+; edited by the user who submitted them.
+;
+; Status ’R’ (review/reserved): the support astronomer changes the status to
+; ’R’ during the OB review. Also this status is used to put OBs on hold and
+; prevent their execution (e.g. while waiting for input from the user). OBs
+; marked as ’R’ cannot be checked out.
+;
+; Status ’+’ (accepted): the support astronomer changes that status to ’+’
+; as the OB is reviewed and certified as valid. OBs marked as ’+’ cannot be
+; checked out.
+;
+; Status ’-’ (rejected): the support astronomer sets the status to ’-’ when
+; an OB presents any problems preventing their certification. OBs with status
+; ’-’ need to be checked out by the user for modifications. If OB with status
+; ’-’ belongs to a scheduling container, the whole scheduling container must
+; be checked-out ; however, only those OBs within the container with ’D’ or
+; ’-’ status can be edited.
+;
+; Status ’C’ (Completed): the OB status is set to C when the OB has been
+; completed within specifications and thus will not be repeated. OBs with
+; status C cannot be checked out.
+;
+; Status ’M’ (Must be repeated): this status is set when the OB has been
+; executed but outside the specified constraints. This OB will be re-inserted
+; in the Service Mode queue to be executed at a later time. OBs with status M
+; cannot be checked out.
+;
+; Status ’A’ (Aborted): this status is set when an OB is aborted during
+; execution. This OB will be re-inserted in the Service Mode queue to be
+; executed at a later time. OBs with status A cannot be checked out.
+;
+; Status ’F’ (Failed): this status is set when an OB containing absolute
+; time widow(s) or being part of a time-linked container, and having acquired
+; the absolute time window due to execution of the previous OB, expires; i.e.
+; when its absolute time window(s) is(are) in the past. Failed OBs cannot be
+; checked out and they cannot be executed! This status is irreversible.
+;
+; Status ’K’ (Kancelled): this status is set by the support astronomer for
+; the OBs are incorrect but for some reason were not checked out. OBs with
+; status K cannot be checked out, and this status is irreversible.
+;
+; Status ’T’ (Terminated): this status is set by the support astronomer for
+; the OBs that belong to runs that have been Terminated at the end of the
+; observing period because the run is not eligible for carryover status. OBs
+; with status T cannot be checked out, and this status is irreversible.
 ;
 ; NAME:
 ;       ob_progress
@@ -1355,11 +1407,11 @@ n_cancelled=count
 message,/inf,traceback()
 message, /inf,'Total number of OBs: ' + string(ndata_all)
 message, /inf,'Number of Cancelled OBs: ' + string(n_cancelled)
-n_valid=ndata_all  - n_cancelled
+n_valid = ndata_all  - n_cancelled
 
 legend=        'All         OBs: ' + string(ndata_all,'(i6)')
 legend=[legend,'Unique     OBs: ' + string(n_unique,'(i6)')]
-legend=[legend,'Valid       OBs: ' + string(n_valid,'(i6)')]
+legend=[legend,'Valid (-K)  OBs: ' + string(n_valid,'(i6)')]
 
 
 ipos=strpos(data.ob_status, 'C')
@@ -1379,7 +1431,7 @@ endif
 if count gt 0 then ndata=n_elements(xdata)
 if count eq 0 then ndata=0
 
-legend=[legend, 'Completed OBs: ' + string(ndata,'(i6)')]
+legend=[legend, 'Completed(C) OBs: ' + string(ndata,'(i6)')]
 
 if not keyword_set(polyfill) then $
  ;oplot, xdata, ydata, psym=psym, color=fsc_color('Dark Green')
@@ -1412,7 +1464,17 @@ endif
 pcolors=[fsc_color('black'), fsc_color('black'), fsc_color('black'), $
  fsc_color('Dark Green'),fsc_color('orange')]
 
+
+
+
 if not keyword_set(executed) then begin
+
+; Status ’-’ (Rejected)
+ipos=strpos(data.ob_status, '-')
+itest = where(ipos ge 0, count)
+message, /inf,'Number of Rejected OBs: ' + string(count)
+n_rejected = count
+
 ipos=strpos(data.ob_status, 'C')
 itest = where(ipos lt 0, count)
 message, /inf,traceback()
@@ -1427,12 +1489,11 @@ if count gt 0 then begin
   ;endif
   psym=6
   oplot, xdata, ydata, psym=psym, color=fsc_color('orange')
-  n_incomplete=n_elements(xdata) - n_cancelled 
+  n_incomplete = n_elements(xdata) - (n_cancelled + n_rejected)
 endif
 
-legend=[legend, 'Pending    OBs: ' + string(n_incomplete,'(i6)')]
+legend=[legend, 'Pending (-K, -C, --) OBs: ' + string(n_incomplete,'(i6)')]
 psyms=[psyms,psym]
-
 
 ipos=strpos(data.ob_status, 'K')
 itest = where(ipos ge 0, count)
@@ -1482,7 +1543,9 @@ ipos=strpos(data.ob_status, '+')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Accepted OBs: ' + string(count)
 n_accepted=count
-legend=['Accepted OBs: ' + string(n_accepted,'(i6)')]
+legend=['Accepted (+) OBs: ' + string(n_accepted,'(i6)')]
+
+legend=[legend, 'Rejected (-) OBs: ' + string(n_rejected,'(i6)')]
 
 
 ; Status ’D’ (Defined)
@@ -1490,7 +1553,7 @@ ipos=strpos(data.ob_status, 'D')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Defined OBs: ' + string(count)
 n_defined=count
-legend=[legend,'Defined OBs: ' + string(n_defined,'(i6)')]
+legend=[legend, 'Defined (D) OBs: ' + string(n_defined,'(i6)')]
 
 
 ; Status ’M’ (Must repeat)
@@ -1498,7 +1561,7 @@ ipos=strpos(data.ob_status, 'M')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Must repeat OBs: ' + string(count)
 n_must=count
-legend=[legend,'Must repeat OBs: ' + string(n_must,'(i6)')]
+legend=[legend,'Must repeat (M) OBs: ' + string(n_must,'(i6)')]
 
 
 ipos=strpos(data.ob_status, 'K')
@@ -1506,19 +1569,26 @@ itest = where(ipos ge 0, count)
 message,/inf,traceback()
 message, /inf,'Number of Cancelled OBs: ' + string(count)
 n_cancelled=count
-legend=[legend,'Kancelled OBs: ' + string(n_cancelled,'(i6)')]
+legend=[legend,'Kancelled (K) OBs: ' + string(n_cancelled,'(i6)')]
 
 ipos=strpos(data.ob_status, 'A')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Aborted OBs: ' + string(count)
 n_cancelled=count
-legend=[legend,'Aborted OBs: ' + string(n_cancelled,'(i6)')]
+legend=[legend,'Aborted (A) OBs: ' + string(n_cancelled,'(i6)')]
 
 ipos=strpos(data.ob_status, 'X')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Status X OBs: ' + string(count)
 n_status_x=count
 legend=[legend,'Status X OBs: ' + string(n_status_x,'(i6)')]
+
+ipos=strpos(data.ob_status, 'R')
+itest = where(ipos ge 0, count)
+message, /inf,'Number of Status R OBs: ' + string(count)
+n_status_r = count
+legend=[legend,'Status R OBs: ' + string(n_status_r,'(i6)')]
+
 
 
 if not keyword_set(publication) then al_legend, legend, /clear, charsize=1.2, /right_legend,/top_legend
@@ -1693,7 +1763,7 @@ endif
 
 ipos=strpos(data.ob_status, 'C')
 itest = where(ipos gt -1, count)
-message, /inf,'Number of completed OBs: ' + string(count)
+message, /inf,'Number of completed (C) OBs: ' + string(count)
 if count gt 0 then begin
   xdata=data[itest].ra
   ydata=data[itest].exectime
@@ -1819,7 +1889,7 @@ endif
 
 plothist, xdata, color=fsc_color('Dark Green'), halfbin=0, /overplot, thick=2
 ndata=count
-legend=[legend, 'Completed  OBs: ' + string(ndata,'(i5)')]
+legend=[legend, 'Completed (C) OBs: ' + string(ndata,'(i5)')]
 
 
 ipos=strpos(data.ob_status, 'C')
