@@ -1,34 +1,34 @@
 ;$Id: ob_progress.pro,v 1.4 2011/11/12 12:46:58 rgm Exp rgm $
-pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
- verbose=verbose, debug=debug, pause=pause, $
- ps=ps, $
- incomplete=incomplete, survey=survey, runs=runs, $
- date=date, executed=executed, any=any, sdss=sdss, obstatus=obstatus, $
- batch=batch, reverse=reverse, wrfits=wrfits, $
- wise=wise, $
- ukidss=ukidss, overlap=overlap, $
- format=format, tiles=tiles, pawprints=pawprints, $
- rarange=rarange, decrange=decrange,$
- near=near, duplicity=duplicity, $
- exclude=exclude, polyfill=polyfill, title=title, $
- waveband=waveband, sgp=sgp, $
- clean_des=clean_des, $
- desfoot=desfoot, $
- desfile=desfile, $
- despolygon=despolygon,  overplot_despolygon=overplot_despolygon, $
- vstatlas=vstatlas, vstfile=vstfile, $
- plotpath=plotpath, label=label, $
- nofootprints=nofootprints, $
- publication=publication, $
- dust=dust, $
- hermes=hermes, $
- gaia=gaia, $
- spt=spt, $
- viking=viking, video=video, $
- pngsize=pngsize, $
- filtername=filtername, $
- dqc=dqc, $
- extra=extra
+pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $ 
+  verbose=verbose, debug=debug, pause=pause, $
+  ps=ps, $
+  incomplete=incomplete, survey=survey, runs=runs, $
+  date=date, executed=executed, any=any, sdss=sdss, obstatus=obstatus, $
+  batch=batch, reverse=reverse, wrfits=wrfits, $
+  wise=wise, $
+  ukidss=ukidss, overlap=overlap, $
+  format=format, tiles=tiles, pawprints=pawprints, $
+  rarange=rarange, decrange=decrange,$
+  near=near, duplicity=duplicity, $
+  exclude=exclude, polyfill=polyfill, title=title, $
+  waveband=waveband, sgp=sgp, $
+  clean_des=clean_des, $
+  desfoot=desfoot, $
+  desfile=desfile, $
+  despolygon=despolygon,  overplot_despolygon=overplot_despolygon, $
+  vstatlas=vstatlas, vstfile=vstfile, $
+  plotpath=plotpath, label=label, $
+  nofootprints=nofootprints, $
+  publication=publication, $
+  dust=dust, $
+  hermes=hermes, $
+  gaia=gaia, $
+  spt=spt, $
+  viking=viking, video=video, $
+  pngsize=pngsize, $
+  filtername=filtername, $
+  dqc=dqc, $
+  extra=extra
 
 ;+
 ;
@@ -141,7 +141,6 @@ pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
 ;-
 
 compile_opt idl2
-
 common com_splog, loglun, fullprelog
 
 if keyword_set(desfile) then begin
@@ -170,8 +169,6 @@ if keyword_set(despolygon) then begin
   print, 'RA range:  ', minmax(ra_despolygon)
   print, 'Dec range: ', minmax(dec_despolygon)
 endif
-
-pause
 
 get_datestamp, datestamp
 
@@ -238,7 +235,6 @@ endif
 
 ; read in the VIKING DQC file
 if keyword_set(viking) then begin
-
   vikpath = '/data/vhs/dqc/2012/'
   vikfile = 'vistaqc_20120630_pawprints_viking_thin.fits'
 
@@ -250,11 +246,9 @@ if keyword_set(viking) then begin
   print, minmax(viking.ra)
   print, minmax(viking.dec)
   pause, batch=batch
-
 endif
 
 if keyword_set(video) then begin
-
   vikpath='/data/vhs/dqc/2012/'
   vikfile='vistaqc_20120630_pawprints_video_thin.fits'
   infile_viking=vikpath + vikfile
@@ -262,7 +256,6 @@ if keyword_set(video) then begin
   print, minmax(video.ra)
   print, minmax(video.dec)
   pause, batch=batch
-
 endif
 
 
@@ -307,9 +300,12 @@ htmlfile= 'ob_progress_' + $
    '_' + datestamp + '.html'
 openw, ilun_htmlfile, htmlfile, /get_lun
 
-; ESO code
+; ESO status codes
 set_obstatus_codes, obstatus_codes
- 
+print, obstatus_codes
+pause
+
+
 IF keyword_set(ps) THEN begin
   cmd='device,xsize=11.0,ysize=7.5,yoffset=11.0,xoffset=0.5,/inches,/landscape'
 endif
@@ -907,7 +903,7 @@ if keyword_set(rarange) then xrange=rarange
 
 xtitle='RA (hours)'
 ytitle='Declination (degrees)'
-yrange=[-90.0, 45.0]
+yrange=[-90.0, 50.0]
 
 if keyword_set(decrange) then yrange=decrange
 
@@ -984,7 +980,7 @@ if keyword_set(dqc) then begin
 
   xtitle='RA (hours)'
   ytitle='Declination (degrees)'
-  yrange=[-90.0, 45.0]
+  yrange=[-90.0, 50.0]
   if keyword_set(decrange) then yrange=decrange
   charsize=1.4
   print, 'xdata range: ', min(xdata), max(xdata)
@@ -1130,9 +1126,9 @@ if keyword_set(publication) and not keyword_set(title) then title=''
 
 xtitle='RA (hours)'
 ytitle='Declination (degrees)'
-yrange=[-90.0, 45.0]
+yrange=[-90.0, 50.0]
 if keyword_set(decrange) then yrange=decrange
-charsize=1.4
+charsize=1.3
 xdata=xrange
 ydata=yrange
 plot, xdata, ydata, psym=psym, charsize=charsize, $
@@ -1180,18 +1176,11 @@ xrange=rarange
 
 
 if keyword_set(dust) then begin
-
-  dustplot, /overplot, lrange=[0,360.0],brange=[-90.0,45], $
+  dustplot, /overplot, lrange=[0,360.0],brange=[-90.0,50], $
    rangestr = ['0.0', '0.1', 'A(B)'],csys='equ2000',/xterm
-
 endif
 
-
-
-
-
 if keyword_set(wise) then begin
-
   wisefile='/data/vhs/wise/wise_prelim_footprint.fits'
   splog,'Reading: ',wisefile
   wise=mrdfits(wisefile,1,hdr)
@@ -1199,7 +1188,7 @@ if keyword_set(wise) then begin
   ;pause
   xdata=wise.ra/15.0
   ydata=wise.dec
-  yrange=[-90.0, 45.0]
+  yrange=[-90.0, 50.0]
   ;title=sdssfile
   ;charsize=1.4
   ;plot, xdata, ydata, psym=psym, charsize=charsize, $
@@ -1332,16 +1321,15 @@ endif
 
 
 if keyword_set(sdss) then begin
-
   sdssfile='/data/rgm/boss/window_flist_radec.fits'
   splog,'Reading: ',sdssfile
   sdss=mrdfits(sdssfile,1,hdr)
   itest=where(sdss.rerun eq 301,count)  
   xdata=sdss[itest].ra/15.0
   ydata=sdss[itest].dec
-  yrange=[-90.0, 45.0]
+  yrange=[-90.0, 50.0]
   ;title=sdssfile
-  charsize=1.4
+  charsize=1.3
   ;plot, xdata, ydata, psym=psym, charsize=charsize, $
   ;  xrange=xrange, yrange=yrange, $
   ; title=title, xtitle=xtitle, ytitle=ytitle, /nodata
@@ -1366,7 +1354,7 @@ if keyword_set(ukidss) then begin
   ydata=ukidss.dec*!radeg
   yrange=[-90.0, 20.0]
   ;title=sdssfile
-  charsize=1.4
+  charsize=1.3
   ;plot, xdata, ydata, psym=psym, charsize=charsize, $
   ;  xrange=xrange, yrange=yrange, $
   ; title=title, xtitle=xtitle, ytitle=ytitle, /nodata
@@ -1407,11 +1395,18 @@ n_cancelled=count
 message,/inf,traceback()
 message, /inf,'Total number of OBs: ' + string(ndata_all)
 message, /inf,'Number of Cancelled OBs: ' + string(n_cancelled)
-n_valid = ndata_all  - n_cancelled
+
+; Status ’-’ (Rejected)
+ipos=strpos(data.ob_status, '-')
+itest = where(ipos ge 0, count)
+message, /inf,'Number of Rejected OBs: ' + string(count)
+n_rejected = count
+
+n_valid = ndata_all  - (n_cancelled + n_rejected)
 
 legend=        'All         OBs: ' + string(ndata_all,'(i6)')
 legend=[legend,'Unique     OBs: ' + string(n_unique,'(i6)')]
-legend=[legend,'Valid (-K)  OBs: ' + string(n_valid,'(i6)')]
+legend=[legend,'Valid (!K, !-) OBs: ' + string(n_valid,'(i6)')]
 
 
 ipos=strpos(data.ob_status, 'C')
@@ -1465,15 +1460,8 @@ pcolors=[fsc_color('black'), fsc_color('black'), fsc_color('black'), $
  fsc_color('Dark Green'),fsc_color('orange')]
 
 
-
-
 if not keyword_set(executed) then begin
 
-; Status ’-’ (Rejected)
-ipos=strpos(data.ob_status, '-')
-itest = where(ipos ge 0, count)
-message, /inf,'Number of Rejected OBs: ' + string(count)
-n_rejected = count
 
 ipos=strpos(data.ob_status, 'C')
 itest = where(ipos lt 0, count)
@@ -1492,7 +1480,7 @@ if count gt 0 then begin
   n_incomplete = n_elements(xdata) - (n_cancelled + n_rejected)
 endif
 
-legend=[legend, 'Pending (-K, -C, --) OBs: ' + string(n_incomplete,'(i6)')]
+legend=[legend, 'Pending (!K, -C, !-) OBs: ' + string(n_incomplete,'(i6)')]
 psyms=[psyms,psym]
 
 ipos=strpos(data.ob_status, 'K')
@@ -1544,7 +1532,6 @@ itest = where(ipos ge 0, count)
 message, /inf,'Number of Accepted OBs: ' + string(count)
 n_accepted=count
 legend=['Accepted (+) OBs: ' + string(n_accepted,'(i6)')]
-
 legend=[legend, 'Rejected (-) OBs: ' + string(n_rejected,'(i6)')]
 
 
@@ -1577,6 +1564,13 @@ message, /inf,'Number of Aborted OBs: ' + string(count)
 n_cancelled=count
 legend=[legend,'Aborted (A) OBs: ' + string(n_cancelled,'(i6)')]
 
+ipos=strpos(data.ob_status, 'P')
+itest = where(ipos ge 0, count)
+message, /inf,'Number of Status P OBs: ' + string(count)
+n_status_p = count
+legend=[legend,'Status P OBs: ' + string(n_status_p,'(i6)')]
+
+
 ipos=strpos(data.ob_status, 'X')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Status X OBs: ' + string(count)
@@ -1591,7 +1585,8 @@ legend=[legend,'Status R OBs: ' + string(n_status_r,'(i6)')]
 
 
 
-if not keyword_set(publication) then al_legend, legend, /clear, charsize=1.2, /right_legend,/top_legend
+if not keyword_set(publication) then $
+   al_legend, legend, /clear, charsize=1.2, /right_legend,/top_legend
 
 
 overplot='True'
@@ -1724,7 +1719,7 @@ plotfile='ob_progress_groups_' + date + survey + run_title + $
 
 print, min(xdata), max(xdata) 
 if max(xdata)-max(xdata) then begin
-  plothist, xdata, charsize=1.4, $
+  plothist, xdata, charsize=charsize, $
    title=title, xtitle='Number of group members', ytitle='Frequency'
   plotid, /right
   pause, batch=batch, plotfile=plotfile
@@ -1751,7 +1746,7 @@ xspan=xmax-xmin
 xrange=[xmin-(xspan/10.0), xmax+(xspan/10)]
 print, 'xrange: ', xrange
 if xspan gt 0.1 then begin
-  plothist, xdata, charsize=1.4, $
+  plothist, xdata, charsize=charsize, $
     title=title, xtitle=xtitle, ytitle=ytitle, $
     xrange=xrange
   plotid, /right
@@ -1847,23 +1842,23 @@ pause, batch=batch, plotfile=plotfile
 
 
 ; loop through and compute execution time by RA
-
-ob_total=make_array(24, /long)
-exectime_total=make_array(24, /float)
-for i=0,23 do begin
-   itest=where(fix(data.ra) eq i, count)
+ob_total = make_array(24, /long)
+exectime_total = make_array(24, /float)
+for i = 0,23 do begin
+   itest = where(fix(data.ra) eq i, count)
    print, i, count
-   itest=where(data.ra ge i and data.ra lt i+1, count)
+   itest = where(data.ra ge i and data.ra lt i+1, count)
    print, i, count
-   ob_total[i]=count
-   if count gt 0 then exectime_total[i]=total(data[itest].exectime)
+   ob_total[i] = count
+   if count gt 0 then $
+      exectime_total[i] = total(data[itest].exectime)
 endfor
 
 xdata=fix(data.ra)
 
 plothist, xdata, xhist, yhist, /noplot, halfbin=0
-yrange=[0.0,max(yhist)*1.1]
-yrange=[0.0,250.0]
+yrange=[0.0, max(yhist)*1.1]
+yrange=[0.0, 800.0]
 title='OB status: ' + title
 xtitle='RA'
 ytitle='Number of OBs per RA hour'
@@ -1887,12 +1882,13 @@ if count eq 0 then begin
 endif
 
 
-plothist, xdata, color=fsc_color('Dark Green'), halfbin=0, /overplot, thick=2
+plothist, xdata, color=fsc_color('Dark Green'), halfbin=0, $
+          /overplot, thick=2
 ndata=count
 legend=[legend, 'Completed (C) OBs: ' + string(ndata,'(i5)')]
 
 
-ipos=strpos(data.ob_status, 'C')
+ipos = strpos(data.ob_status, 'C')
 itest = where(ipos lt 0, count)
 message, /inf,'Number of incomplete OBs: ' + string(count)
 if count gt 1 then begin
