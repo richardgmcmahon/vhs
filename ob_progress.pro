@@ -55,17 +55,6 @@ pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
 ; Status 'T' (Terminated)
 ;
 ;
-; Status ’D’ (defined): an OB is considered to be fully defined, and its
-; status changes automatically to D, as soon as it reaches the ESO Database.
-; In the ESO Database an OB keeps the status D until a support astronomer
-; starts reviewing it. OBs with status D can still be checked out and then
-; edited by the user who submitted them.
-;
-; Status ’R’ (review/reserved): the support astronomer changes the status to
-; ’R’ during the OB review. Also this status is used to put OBs on hold and
-; prevent their execution (e.g. while waiting for input from the user). OBs
-; marked as ’R’ cannot be checked out.
-;
 ; Status ’+’ (accepted): the support astronomer changes that status to ’+’
 ; as the OB is reviewed and certified as valid. OBs marked as ’+’ cannot be
 ; checked out.
@@ -76,6 +65,17 @@ pro ob_progress, infile=infile, vsa=vsa, wfau=wfau, wsa=wsa, casu=casu, $
 ; ’-’ belongs to a scheduling container, the whole scheduling container must
 ; be checked-out ; however, only those OBs within the container with ’D’ or
 ; ’-’ status can be edited.
+;
+; Status ’D’ (defined): an OB is considered to be fully defined, and its
+; status changes automatically to D, as soon as it reaches the ESO Database.
+; In the ESO Database an OB keeps the status D until a support astronomer
+; starts reviewing it. OBs with status D can still be checked out and then
+; edited by the user who submitted them.
+;
+; Status ’R’ (review/reserved): the support astronomer changes the status to
+; ’R’ during the OB review. Also this status is used to put OBs on hold and
+; prevent their execution (e.g. while waiting for input from the user). OBs
+; marked as ’R’ cannot be checked out.
 ;
 ; Status ’C’ (Completed): the OB status is set to C when the OB has been
 ; completed within specifications and thus will not be repeated. OBs with
@@ -1404,9 +1404,9 @@ n_rejected = count
 
 n_valid = ndata_all  - (n_cancelled + n_rejected)
 
-legend=        'All         OBs: ' + string(ndata_all,'(i6)')
-legend=[legend,'Unique     OBs: ' + string(n_unique,'(i6)')]
-legend=[legend,'Valid (!K, !-) OBs: ' + string(n_valid,'(i6)')]
+legend = 'All         OBs: ' + string(ndata_all,'(i6)')
+legend = [legend, 'Unique     OBs: ' + string(n_unique,'(i6)')]
+legend = [legend, 'Valid (!K, !-) OBs: ' + string(n_valid,'(i6)')]
 
 
 ipos=strpos(data.ob_status, 'C')
@@ -1450,51 +1450,56 @@ if keyword_set(polyfill) and keyword_set(viking) then begin
 endif
 
 if keyword_set(polyfill) and keyword_set(video) then begin
- ;plot_vistatile, xdata=viking.ra, ydata=viking.dec, $
- ; color=fsc_color('red')
- oplot, video.ra/15.0, video.dec, $
-  psym=symcat(15), color=fsc_color('orange'), symsize=5.0
+   ;plot_vistatile, xdata=viking.ra, ydata=viking.dec, $
+   ; color=fsc_color('red')
+   oplot, video.ra/15.0, video.dec, $
+          psym=symcat(15), color=fsc_color('orange'), symsize=5.0
 endif
 
-pcolors=[fsc_color('black'), fsc_color('black'), fsc_color('black'), $
- fsc_color('Dark Green'),fsc_color('orange')]
-
+pcolors = [fsc_color('black'), fsc_color('black'), fsc_color('black'), $
+           fsc_color('Dark Green'),fsc_color('orange')]
 
 if not keyword_set(executed) then begin
 
+   ipos=strpos(data.ob_status, 'C')
+   itest = where(ipos lt 0, count)
+   message, /inf,traceback()
+   message, /inf, 'Number of incomplete OBs: ' + string(count)
+   n_incomplete=0
+   if count gt 0 then begin
+      xdata=[data[itest].ra]
+      ydata=[data[itest].dec]
+      ;if count eq 1 then begin
+      ;  xdata=[data[itest].ra]
+      ;  ydata=[data[itest].dec]
+      ;endif
+      psym=6
+      oplot, xdata, ydata, psym=psym, color=fsc_color('orange')
+      n_incomplete = n_elements(xdata) - (n_cancelled + n_rejected)
+   endif
 
-ipos=strpos(data.ob_status, 'C')
-itest = where(ipos lt 0, count)
-message, /inf,traceback()
-message, /inf,'Number of incomplete OBs: ' + string(count)
-n_incomplete=0
-if count gt 0 then begin
-  xdata=[data[itest].ra]
-  ydata=[data[itest].dec]
-  ;if count eq 1 then begin
-  ;  xdata=[data[itest].ra]
-  ;  ydata=[data[itest].dec]
-  ;endif
-  psym=6
-  oplot, xdata, ydata, psym=psym, color=fsc_color('orange')
-  n_incomplete = n_elements(xdata) - (n_cancelled + n_rejected)
-endif
+   legend=[legend, 'Pending (!K, -C, !-) OBs: ' + string(n_incomplete,'(i6)')]
+   psyms=[psyms,psym]
 
-legend=[legend, 'Pending (!K, -C, !-) OBs: ' + string(n_incomplete,'(i6)')]
-psyms=[psyms,psym]
+ipos = strpos(data.ob_status, 'K')
+itest_K = where(ipos ge 0, count)
+message, /inf, traceback()
+message, /inf, 'Number of Cancelled OBs: ' + string(count)
+n_cancelled = count
 
-ipos=strpos(data.ob_status, 'K')
-itest = where(ipos ge 0, count)
-message,/inf,traceback()
-message, /inf,'Number of Cancelled OBs: ' + string(count)
-print, itest[0]
-n_cancelled=count
-if count gt 0 then begin
-  xdata=data[itest].ra
-  ydata=data[itest].dec
-  if count eq 1 then begin
-    xdata=[data[itest].ra]
-    ydata=[data[itest].dec]
+ipos = strpos(data.ob_status, '-')
+itest_Rejected = where(ipos ge 0, count)
+message, /inf, traceback()
+message, /inf, 'Number of Rejected OBs: ' + string(count)
+n_rejected = count
+
+
+if n_cancelled gt 0 then begin
+  xdata=data[itest_K].ra
+  ydata=data[itest_K].dec
+  if n_cancelled eq 1 then begin
+    xdata=[data[itest_K].ra]
+    ydata=[data[itest_K].dec]
   endif
   nplot=n_elements(xdata)
   message, /inf,'Number of points to be plotted: ' + string(nplot)
@@ -1502,9 +1507,24 @@ if count gt 0 then begin
   oplot, xdata, ydata, psym=psym, color=fsc_color('red')
 endif
 
-legend=[legend, 'Cancelled  OBs: ' + string(n_cancelled,'(i6)')]
-psyms=[psyms,psym]
-pcolors=[pcolors, fsc_color('red')]
+if n_rejected gt 0 then begin
+  xdata=data[itest_Rejected].ra
+  ydata=data[itest_Rejected].dec
+  if n_rejected eq 1 then begin
+    xdata = [data[itest_Rejected].ra]
+    ydata = [data[itest_Rejected].dec]
+  endif
+  nplot = n_elements(xdata)
+  message, /inf, 'Number of points to be plotted: ' + string(nplot)
+  psym = 6
+  oplot, xdata, ydata, psym=psym, color=fsc_color('red')
+endif
+
+
+legend = [legend, 'Cancelled/Rejected OBs: ' + $
+        string(n_cancelled + n_rejected,'(i6)')]
+psyms = [psyms, psym]
+pcolors = [pcolors, fsc_color('red')]
 
 endif
 
@@ -1532,8 +1552,17 @@ itest = where(ipos ge 0, count)
 message, /inf,'Number of Accepted OBs: ' + string(count)
 n_accepted=count
 legend=['Accepted (+) OBs: ' + string(n_accepted,'(i6)')]
+
+; Status ’R'
 legend=[legend, 'Rejected (-) OBs: ' + string(n_rejected,'(i6)')]
 
+; Status ’K'
+ipos=strpos(data.ob_status, 'K')
+itest = where(ipos ge 0, count)
+message,/inf,traceback()
+message, /inf,'Number of Kancelled OBs: ' + string(count)
+n_cancelled=count
+legend=[legend, 'Kancelled (K) OBs: ' + string(n_cancelled,'(i6)')]
 
 ; Status ’D’ (Defined)
 ipos=strpos(data.ob_status, 'D')
@@ -1550,25 +1579,18 @@ message, /inf,'Number of Must repeat OBs: ' + string(count)
 n_must=count
 legend=[legend,'Must repeat (M) OBs: ' + string(n_must,'(i6)')]
 
-
-ipos=strpos(data.ob_status, 'K')
-itest = where(ipos ge 0, count)
-message,/inf,traceback()
-message, /inf,'Number of Cancelled OBs: ' + string(count)
-n_cancelled=count
-legend=[legend,'Kancelled (K) OBs: ' + string(n_cancelled,'(i6)')]
-
+; Status ’A’ (Aborted)
 ipos=strpos(data.ob_status, 'A')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Aborted OBs: ' + string(count)
-n_cancelled=count
-legend=[legend,'Aborted (A) OBs: ' + string(n_cancelled,'(i6)')]
+n_aborted = count
+legend=[legend,'Aborted (A) OBs: ' + string(n_aborted,'(i6)')]
 
 ipos=strpos(data.ob_status, 'P')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Status P OBs: ' + string(count)
 n_status_p = count
-legend=[legend,'Status P OBs: ' + string(n_status_p,'(i6)')]
+legend=[legend,'Partially definded (P) OBs: ' + string(n_status_p,'(i6)')]
 
 
 ipos=strpos(data.ob_status, 'X')
@@ -1581,8 +1603,7 @@ ipos=strpos(data.ob_status, 'R')
 itest = where(ipos ge 0, count)
 message, /inf,'Number of Status R OBs: ' + string(count)
 n_status_r = count
-legend=[legend,'Status R OBs: ' + string(n_status_r,'(i6)')]
-
+legend=[legend,'Under review (R) OBs: ' + string(n_status_r,'(i6)')]
 
 
 if not keyword_set(publication) then $
@@ -1857,10 +1878,10 @@ endfor
 xdata=fix(data.ra)
 
 plothist, xdata, xhist, yhist, /noplot, halfbin=0
-yrange=[0.0, max(yhist)*1.1]
-yrange=[0.0, 800.0]
+yrange = [0.0, max(yhist)*1.1]
+yrange = [0.0, 800.0]
 title='OB status: ' + title
-xtitle='RA'
+xtitle='RA (hours)'
 ytitle='Number of OBs per RA hour'
 plothist, xdata, charsize=charsize, halfbin=0, $
  xrange=xrange, yrange=yrange, $
@@ -1886,7 +1907,6 @@ plothist, xdata, color=fsc_color('Dark Green'), halfbin=0, $
           /overplot, thick=2
 ndata=count
 legend=[legend, 'Completed (C) OBs: ' + string(ndata,'(i5)')]
-
 
 ipos = strpos(data.ob_status, 'C')
 itest = where(ipos lt 0, count)
@@ -1918,44 +1938,58 @@ pause, batch=batch, plotfile=plotfile
 ; analysis  of execution times
 exectime_total=make_array(24, /float)
 
-splog, 'Total allocated time (hours): ',total(data.exectime)/3600.0
-splog, 'RA range: ',minmax(data.ra)
-count_all=0
-for i=0,23 do begin
-   itest=where(fix(data.ra) eq i, count)
+ipos_Cancelled = strpos(data.ob_status, 'K')
+ipos_Rejected = strpos(data.ob_status, 'R')
+ipos = ipos_Cancelled + ipos_Rejected
+print, n_elements(ipos_Cancelled)
+print, n_elements(ipos_Rejected)
+print, n_elements(ipos)
+idata = where(ipos gt -1, count)
+print, count, n_elements(idata), n_elements(data)
+
+total_allocated = total(data.exectime)/3600.0
+splog, 'Total allocated time (hours): ', total_allocated
+splog, 'RA range: ', minmax(data.ra)
+count_all = 0
+for i = 0, 23 do begin
+   itest = where(fix(data.ra) eq i, count)
    print, i, count
-   itest=where(data.ra ge i and data.ra lt i+1, count)
+   itest = where(data.ra ge i and data.ra lt i+1, count)
    print, i, count
-   if count gt 0 then exectime_total[i]=total(data[itest].exectime)
+   if count gt 0 then exectime_total[i] = total(data[itest].exectime)
    count_all=count_all + count
 endfor
 splog, traceback()
-ndata=n_elements(data.ra)
+ndata = n_elements(data.ra)
 splog, 'Number of OBs: ', ndata, count_all
 splog, 'Total allocated time (hours): ',total(exectime_total)/3600.0
 
 
-xdata=findgen(24)+0.5
+xdata = findgen(24) + 0.5
 print, xdata
 ydata=exectime_total/3600.0
 
-yrange=[0.0,max(ydata)*1.1]
+yrange=[0.0,max(ydata)*1.2]
 ;yrange=[0.0,100.0]
-ytitle='Total execution time per hour of RA'
+ytitle='Total execution time per hour of RA (hours)'
 plot, xdata, ydata, charsize=charsize, $
  xrange=xrange, yrange=yrange, $
  title=title, xtitle=xtitle, ytitle=ytitle
-plotid, /right
-legend='Total allocated time (hrs):   ' + string(total(ydata),'(f6.1)')
+plotid, /right, charsize=0.85
+
+legend = 'Total allocated time (hrs; OBs):   ' + $
+         string(total(ydata),'(f6.1)') + ';' + $
+         string(ndata, '(i6)')
 
 splog, traceback()
-ipos=strpos(data.ob_status, 'C')
+ipos = strpos(data.ob_status, 'C')
 idata = where(ipos gt -1, count)
 message, /inf,'Number of completed OBs: ' + string(count)
 if count gt 0 then message, /inf,'Total execution time: ' + $
- string(total(data[idata].exectime)/3600.0)
+                            string(total(data[idata].exectime)/3600.0)
 if count lt 0 then message, /inf,'Total execution time: ' + '0.0'
 
+ndata = n_elements(data[idata])
 exectime_total=make_array(24, /float,value=0.0)
 if count eq 0 then ydata=0
 if count gt 0 then begin
@@ -1965,7 +1999,7 @@ if count gt 0 then begin
     print, i, count
     itest=where(data[idata].ra ge i and data[idata].ra lt i+1, count)
     print, i, count
-    if count gt 0 then exectime_total[i]=total(data[idata[itest]].exectime)
+    if count gt 0 then exectime_total[i] = total(data[idata[itest]].exectime)
     count_all=count_all+count
   endfor
   splog, traceback()
@@ -1974,16 +2008,20 @@ if count gt 0 then begin
   oplot, xdata, ydata, color=fsc_color('Dark Green'), thick=2
 endif
 
-legend=$
- [legend,'Total executed time (hrs):   ' + string(total(ydata),'(f6.1)')]
-splog, 'Total execution time (hours): ',total(exectime_total)/3600.0
 
-ipos=strpos(data.ob_status, 'C')
+legend = $
+   [legend, 'Total executed time (hrs; OBs):   ' + $
+    string(total(ydata),'(f6.1)') + ';' + $
+    string(ndata, '(i6)')]
+splog, 'Total execution time (hours): ', total(exectime_total)/3600.0
+
+ipos = strpos(data.ob_status, 'C')
 idata = where(ipos lt 0, count)
 message, /inf,'Number of incomplete OBs: ' + string(count)
-if count gt 0 then message, /inf,'Total execution time: ' $
- + string(total(data[idata].exectime)/3600.0)
+if count gt 0 then message, /inf,'Total execution time: ' + $
+                            string(total(data[idata].exectime)/3600.0)
 
+ndata = n_elements(data[idata])
 exectime_total=make_array(24, /float,value=0.0)
 ydata=exectime_total
 count_all=0
@@ -2001,25 +2039,24 @@ if count gt 0 then begin
   splog,'Number of OB counted: ',count_all
   ydata=exectime_total/3600.0
   oplot, xdata, ydata, color=fsc_color('red')
-
 endif
-legend=[legend,'Total unexecuted time (hrs): ' + string(total(ydata),'(f6.1)')]
+legend = [legend,'Total unexecuted time (hrs; OBs): ' + $
+          string(total(ydata),'(f6.1)') + ';' + $
+          string(ndata, '(i6)')]
 
 al_legend, legend, $
  linestyle=linestyles, colors=pcolors, /clear, charsize=1.2
 
 splog,traceback()
-plotfile= plotpath + 'ob_progress_exectime_hist_' + date + survey + run_title 
+plotfile = plotpath + 'ob_progress_exectime_hist_' + date + survey + run_title 
 
 IF keyword_set(ps) THEN begin
-  plotfile=plotfile + '.ps'
-  colorpsopen,plotfile,cmd
+  plotfile = plotfile + '.ps'
+  colorpsopen, plotfile, cmd
 endif
 IF not keyword_set(ps) THEN plotfile = plotfile + '.png'
 pause, batch=batch, plotfile=plotfile
-
 print, 'Total unexecuted time (hours): ',total(exectime_total)/3600.0
-
 
 exit:
 
